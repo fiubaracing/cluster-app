@@ -1,8 +1,8 @@
 // utils/withErrorHandler.ts
 import { ApiException } from "../exceptions/api.exception";
 import InternalServerErrorException from "../exceptions/internal-server-error.exception";
-import { ApiHandler, TRACE_HEADER } from "../types";
-import { logger } from "../config/logger";
+import { ApiHandler } from "../types/api";
+import { TRACE_HEADER } from "../consts/header";
 
 export function withErrorHandler(handler: ApiHandler) {
   return async (req: Request, ...args: any[]) => {
