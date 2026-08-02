@@ -1,4 +1,4 @@
-import { ApiHandler } from "../types/api";
+import { ApiHandler } from "../../types/api";
 import { TRACE_HEADER } from "../consts/header";
 import { traceStorage, logger } from "../config/logger";
 

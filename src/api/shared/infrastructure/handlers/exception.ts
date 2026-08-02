@@ -1,6 +1,6 @@
 import { ApiException } from "../exceptions/api.exception";
 import { InternalServerErrorException } from "../exceptions/internal-server-error.exception";
-import { ApiHandler } from "../types/api";
+import { ApiHandler } from "../../types/api";
 import { TRACE_HEADER } from "../consts/header";
 import { ValidationError } from "yup";
 import { BadRequestException } from "../exceptions/bad-request.exception";
