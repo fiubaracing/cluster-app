@@ -11,7 +11,7 @@ export class ApiException extends Error {
     detail: string,
     status: number,
     errorCode: string,
-    errorArgs?: Record<string, object>,
+    errorArgs?: ApiExceptionArgs
   ) {
     super(detail);
     this.title = title;
@@ -30,9 +30,11 @@ export class ApiException extends Error {
   }
 }
 
+export type ApiExceptionArgs = Record<string, any>;
+
 export interface ApiExceptionExtension {
   code: string;
-  args?: Record<string, object>;
+  args?: ApiExceptionArgs;
   timestamp: string;
   traceId: string;
 }

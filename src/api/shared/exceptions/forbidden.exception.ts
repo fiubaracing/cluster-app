@@ -1,12 +1,12 @@
 import { constants } from "http2";
-import { ApiException, ApiExceptionExtension } from "./api.exception";
+import { ApiException, ApiExceptionArgs } from "./api.exception";
 
-export default class ForbiddenException extends ApiException {
+export class ForbiddenException extends ApiException {
   constructor(
     title: string,
     detail: string,
     errorCode: string,
-    errorArgs?: Record<string, object>,
+    errorArgs?: ApiExceptionArgs,
   ) {
     super(
       title,
