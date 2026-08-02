@@ -3,7 +3,7 @@ import { TRACE_HEADER } from "../consts/header";
 import { traceStorage, logger } from "../config/logger";
 
 export function withLogging(handler: ApiHandler) {
-	return async (req: Request, ...args: any[]) => {
+	return async function (this: unknown, req: Request, ...args: any[]) {
 		// Extract the header from the client, or generate a fallback timestamp string if missing
 		const traceId = req.headers.get(TRACE_HEADER) || crypto.randomUUID();
 
@@ -12,7 +12,7 @@ export function withLogging(handler: ApiHandler) {
 			logger.info(`HTTP ${req.method} ${req.url} - Started`);
 
 			req.headers.set(TRACE_HEADER, traceId);
-			const response = await handler(req, ...args);
+			const response = await handler.call(this, req, ...args);
 			response.headers.set(TRACE_HEADER, traceId);
 
 			logger.info(
