@@ -4,9 +4,10 @@ import { ApiHandler } from "../../types/api";
 import { TRACE_HEADER } from "../consts/header";
 import { ValidationError } from "yup";
 import { BadRequestException } from "../exceptions/bad-request.exception";
+import { ApiRequest, ApiResponse } from "@/api/shared/types/api";
 
 export function withErrorHandler(handler: ApiHandler) {
-	return async function (this: unknown, req: Request, ...args: any[]) {
+	return async function (this: unknown, req: ApiRequest, ...args: any[]) {
 		try {
 			return await handler.call(this, req, ...args);
 		} catch (e) {
@@ -54,6 +55,7 @@ const extractFieldErrors = (error: ValidationError): Record<string, string> => {
 	return fieldErrors;
 };
 
-const mapResponse = (e: ApiException): Response => {
-	return Response.json(e, { status: e.status.valueOf() });
+
+const mapResponse = (e: ApiException): ApiResponse => {
+	return new ApiResponse(JSON.stringify(e), { status: e.status.valueOf() });
 };

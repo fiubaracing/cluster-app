@@ -1,9 +1,10 @@
 import { ApiHandler } from "../../types/api";
 import { TRACE_HEADER } from "../consts/header";
 import { traceStorage, logger } from "../config/logger";
+import { ApiRequest } from "@/api/shared/types/api";
 
 export function withLogging(handler: ApiHandler) {
-	return async function (this: unknown, req: Request, ...args: any[]) {
+	return async function (this: unknown, req: ApiRequest, ...args: any[]) {
 		// Extract the header from the client, or generate a fallback timestamp string if missing
 		const traceId = req.headers.get(TRACE_HEADER) || crypto.randomUUID();
 

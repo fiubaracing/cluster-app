@@ -4,27 +4,31 @@ import { withLogging } from "./tracing";
 import { withErrorHandler } from "./exception";
 import { ApiHandler } from "../../types/api";
 import * as yup from "yup";
+import { ApiRequest } from "@/api/shared/types/api";
+import { withAuth } from "./auth";
 
 export const execFile = promisify(execFileNode);
 
 export interface Middlewares {
 	logging?: boolean;
 	errorHandler?: boolean;
+	auth?: boolean;
 }
 
 const wrapRequest = <T extends ApiHandler>(
 	handler: T,
-	{ logging = true, errorHandler = true }: Middlewares = {},
+	{ logging = true, errorHandler = true, auth = true }: Middlewares = {},
 ) => {
 	let wrappedHandler: ApiHandler = function (
 		this: unknown,
-		req: Request,
+		req: ApiRequest,
 		...args: any[]
 	) {
 		return handler.call(this, req, ...args);
 	};
 
 	if (logging) wrappedHandler = withLogging(wrappedHandler);
+	if (auth) wrappedHandler = withAuth(wrappedHandler);
 	if (errorHandler) wrappedHandler = withErrorHandler(wrappedHandler);
 
 	return wrappedHandler as T;
@@ -66,7 +70,7 @@ export const validator = async (
 	});
 };
 
-export const parseJSON = async (req: Request): Promise<any> => {
+export const parseJSON = async (req: ApiRequest): Promise<any> => {
 	try {
 		return await req.json();
 	} catch (e) {

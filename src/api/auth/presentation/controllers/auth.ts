@@ -12,7 +12,7 @@ import { LoginDTO } from "../../application/dtos/login";
 import { Auth } from "../../domain/models/auth";
 import { mapAuthResponse } from "../mappers/auth-response.mapper";
 import { LoginSSOUseCase } from "@/api/auth/application/usecases/login-sso.usecase";
-import { NextResponse } from "next/server";
+import { ApiRequest, ApiResponse } from "@/api/shared/types/api";
 
 interface AuthControllerDependencies {
 	loginSsoUseCase?: LoginSSOUseCase;
@@ -26,7 +26,7 @@ export default class AuthController {
 	}
 
 	@Endpoint()
-	async login(req: Request) {
+	async login(req: ApiRequest) {
 		const rawBody = await parseJSON(req);
 		const body: LoginRequestBody = await validator(
 			loginRequestBodySchema,
@@ -36,7 +36,7 @@ export default class AuthController {
 		const dto: LoginDTO = mapLoginDTO(body);
 		const auth: Auth = await this.loginSsoUseCase.execute(dto);
 
-		const response = NextResponse.json('', { status: 200 });
+		const response = ApiResponse.json('', { status: 200 });
 		response.cookies.set({
 			name: "accessToken",
 			value: auth.access.token,
