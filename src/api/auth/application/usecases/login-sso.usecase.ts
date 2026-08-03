@@ -34,6 +34,13 @@ export class LoginSSOUseCase {
 			deps?.googleOAuthRepository ?? new GoogleOAuthRepositoryImpl();
 	}
 
+	/**
+	 * Executes the login process using Single Sign-On (SSO) with Google OAuth.
+	 * Validates the provided Google access token, retrieves the associated user,
+	 * and generates authentication tokens (access and refresh).
+	 * @param dto - The data transfer object containing the Google access token.
+	 * @returns A promise that resolves to an Auth object containing the access and refresh tokens.
+	 */
 	async execute(dto: LoginDTO): Promise<Auth> {
 		logger.info(`Use case LoginSSOUseCase started`);
 

@@ -16,6 +16,12 @@ export class FindShallowUserByEmailUseCase {
 		this.userRepository = deps?.userRepository ?? new UserRepositoryImpl();
 	}
 
+	/**
+	 * Executes the use case to find a shallow user by their email address.
+	 * @param email - The email address of the user to find.
+	 * @returns A promise that resolves to the User object if found, or throws a UserNotFoundException if not found.
+	 * @throws UserNotFoundException if no user is found with the provided email address.
+	 */
 	async execute(email: string): Promise<User> {
 		logger.info(
 			`Use case FindShallowUserByEmailUseCase started for email: ${email}`,
