@@ -12,4 +12,15 @@ export interface UserRepository {
 		email: string,
 		state: ActiveStateType,
 	): Promise<User | null>;
+
+	/**
+	 * Finds a shallow user by their UUID and active state.
+	 * @param uuid - The UUID of the user to find.
+	 * @param state - The active state of the user to filter by.
+	 * @returns A promise that resolves to the User object if found, or null if not found.
+	 */
+	findShallowByUuidAndState(
+		uuid: string,
+		state: ActiveStateType,
+	): Promise<User | null>;
 }

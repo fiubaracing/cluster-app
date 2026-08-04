@@ -10,22 +10,27 @@ import {
 import { mapLoginDTO } from "../../application/mappers/auth.mapper";
 import { LoginDTO } from "../../application/dtos/login";
 import { Auth } from "../../domain/models/auth";
-import { mapAuthResponse } from "../mappers/auth-response.mapper";
 import { LoginSSOUseCase } from "@/api/auth/application/usecases/login-sso.usecase";
 import { ApiRequest, ApiResponse } from "@/api/shared/types/api";
+import { BlankTokenException } from "../../application/exceptions/blank-token.exception";
+import { RefreshTokenUseCase } from "../../application/usecases/refresh-token.usecase";
+import { ACCESS_TOKEN_TTL_SECONDS, REFRESH_TOKEN_TTL_SECONDS } from "@/api/shared/infrastructure/consts/token-ttl";
 
 interface AuthControllerDependencies {
 	loginSsoUseCase?: LoginSSOUseCase;
+	refreshTokenUseCase?: RefreshTokenUseCase;
 }
 
 export default class AuthController {
-	private loginSsoUseCase: LoginSSOUseCase;
+	private readonly loginSsoUseCase: LoginSSOUseCase;
+	private readonly refreshTokenUseCase: RefreshTokenUseCase;
 
 	constructor(deps?: AuthControllerDependencies) {
 		this.loginSsoUseCase = deps?.loginSsoUseCase ?? new LoginSSOUseCase();
+		this.refreshTokenUseCase = deps?.refreshTokenUseCase ?? new RefreshTokenUseCase();
 	}
 
-	@Endpoint()
+	@Endpoint({ auth: false })
 	async login(req: ApiRequest) {
 		const rawBody = await parseJSON(req);
 		const body: LoginRequestBody = await validator(
@@ -37,26 +42,36 @@ export default class AuthController {
 		const auth: Auth = await this.loginSsoUseCase.execute(dto);
 
 		const response = ApiResponse.json('', { status: 200 });
-		response.cookies.set({
-			name: "accessToken",
-			value: auth.access.token,
-			httpOnly: true,
-			secure: process.env.NODE_ENV === "production", // Only HTTPS in production
-			sameSite: "lax", // Protects against CSRF
-			maxAge: 60 * 60 * 24 * 1, // 1 day in seconds
-			path: "/",
-		});
+		this.setAuthCookie(response, "accessToken", auth.access.token, ACCESS_TOKEN_TTL_SECONDS);
+		this.setAuthCookie(response, "refreshToken", auth.refresh.token, REFRESH_TOKEN_TTL_SECONDS);
 
+		return response;
+	}
+
+	@Endpoint ({ auth: false })
+	async refresh(req: ApiRequest) {
+		const refreshToken = req.cookies.get("refreshToken")?.value;
+		if (!refreshToken) {
+			return BlankTokenException.fromRefreshToken();
+		}
+
+		const newAccessToken = await this.refreshTokenUseCase.execute(refreshToken);
+
+		const response = ApiResponse.json('', { status: 200 });
+		this.setAuthCookie(response, "accessToken", newAccessToken, ACCESS_TOKEN_TTL_SECONDS);
+
+		return response;
+	}
+
+	private setAuthCookie(response: ApiResponse, name: string, token: string, maxAge: number) {
 		response.cookies.set({
-			name: "refreshToken",
-			value: auth.refresh.token,
+			name,
+			value: token,
 			httpOnly: true,
 			secure: process.env.NODE_ENV === "production",
 			sameSite: "lax",
-			maxAge: 60 * 60 * 24 * 7, // 7 days in seconds
+			maxAge: maxAge, // 1 day in seconds
 			path: "/",
 		});
-
-		return response;
 	}
 }

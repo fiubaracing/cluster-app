@@ -33,7 +33,7 @@ export class FindShallowUserByEmailUseCase {
 		);
 
 		if (!user) {
-			throw new UserNotFoundException(email);
+			throw UserNotFoundException.fromEmail(email);
 		}
 
 		logger.info(

@@ -11,14 +11,6 @@ export class InvalidJWTException extends UnauthorizedException {
 		super(title, detail, errorCode, errorArgs);
 	}
 
-	static fromBlank() {
-		return new InvalidJWTException(
-			"Blank JWT",
-			"The provided JWT is blank. Please login again.",
-			"jwt.blank",
-		);
-	}
-
 	static fromInvalid() {
 		return new InvalidJWTException(
 			"Invalid JWT",

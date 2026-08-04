@@ -20,4 +20,20 @@ export class UserDrizzleRepository {
 				return result.length === 0 ? null : result[0] as UserEntity;
 			});
 	}
+
+	static async findByUuidAndState(
+		uuid: string,
+		state: ActiveStateType,
+	): Promise<UserEntity | null> {
+		return await db
+			.select()
+			.from(usersInCore)
+			.where(
+				and(eq(usersInCore.uuid, uuid), eq(usersInCore.state, state)),
+			)
+			.limit(1)
+			.then((result) => {
+				return result.length === 0 ? null : result[0] as UserEntity;
+			});
+	}
 }

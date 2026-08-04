@@ -12,6 +12,7 @@ import { JWTRepository } from "@/api/auth/domain/repositories/jwt.repository";
 import { JWTRepositoryImpl } from "@/api/auth/infrastructure/adapters/jwt.repository-impl";
 import { RefreshTokenPayload } from "../../domain/models/refresh-token-payload";
 import { AccessTokenPayload } from "../../domain/models/access-token-payload";
+import { ACCESS_TOKEN_TTL, REFRESH_TOKEN_TTL } from "@/api/shared/infrastructure/consts/token-ttl";
 
 interface LoginSSOUseCaseDependencies {
 	findShallowUserByEmailUseCase?: FindShallowUserByEmailUseCase;
@@ -85,11 +86,11 @@ export class LoginSSOUseCase {
 
 		const accessToken = await this.jwtRepository.signToken(
 			accessPayload,
-			"1d",
+			ACCESS_TOKEN_TTL,
 		);
 		const refreshToken = await this.jwtRepository.signToken(
 			refreshPayload,
-			"7d",
+			REFRESH_TOKEN_TTL,
 		);
 
 		return new Auth(accessToken, refreshToken);

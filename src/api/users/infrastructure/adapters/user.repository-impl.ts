@@ -16,4 +16,13 @@ export class UserRepositoryImpl implements UserRepository {
 			),
 		);
 	}
+
+	async findShallowByUuidAndState(
+		uuid: string,
+		state: ActiveStateType,
+	): Promise<User | null> {
+		return UserEntityMapper.mapToDomainShallow(
+			await UserDrizzleRepository.findByUuidAndState(uuid, state),
+		);
+	}
 }
