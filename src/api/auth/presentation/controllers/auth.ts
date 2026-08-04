@@ -7,7 +7,7 @@ import {
 	LoginRequestBody,
 	loginRequestBodySchema,
 } from "../dtos/requests/login";
-import { mapLoginDTO } from "../../application/mappers/auth.mapper";
+import { AuthMapper } from "../../application/mappers/auth.mapper";
 import { LoginDTO } from "../../application/dtos/login";
 import { Auth } from "../../domain/models/auth";
 import { LoginSSOUseCase } from "@/api/auth/application/usecases/login-sso.usecase";
@@ -38,7 +38,7 @@ export default class AuthController {
 			rawBody,
 		);
 
-		const dto: LoginDTO = mapLoginDTO(body);
+		const dto: LoginDTO = AuthMapper.toLoginDTO(body);
 		const auth: Auth = await this.loginSsoUseCase.execute(dto);
 
 		const response = ApiResponse.json('', { status: 200 });

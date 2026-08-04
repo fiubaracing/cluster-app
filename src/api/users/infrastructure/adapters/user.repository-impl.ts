@@ -9,7 +9,7 @@ export class UserRepositoryImpl implements UserRepository {
 		email: string,
 		state: ActiveStateType,
 	): Promise<User | null> {
-		return UserEntityMapper.mapToDomainShallow(
+		return UserEntityMapper.toDomainShallow(
 			await UserDrizzleRepository.findShallowByEmailAndState(
 				email,
 				state,
@@ -21,7 +21,7 @@ export class UserRepositoryImpl implements UserRepository {
 		uuid: string,
 		state: ActiveStateType,
 	): Promise<User | null> {
-		return UserEntityMapper.mapToDomainShallow(
+		return UserEntityMapper.toDomainShallow(
 			await UserDrizzleRepository.findByUuidAndState(uuid, state),
 		);
 	}
