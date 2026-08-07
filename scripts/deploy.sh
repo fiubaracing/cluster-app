@@ -22,6 +22,12 @@ until docker exec cluster-db pg_isready -U myuser > /dev/null 2>&1; do
 done
 echo "PostgreSQL is ready!"
 
+echo "Waiting for Redis to start..."
+until docker exec cluster-redis redis-cli ping > /dev/null 2>&1; do
+  sleep 1
+done
+echo "Redis is ready!"
+
 echo "Installing PM2 and pm2-logrotate..."
 npx -y pm2 install pm2-logrotate
 

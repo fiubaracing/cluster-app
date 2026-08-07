@@ -1,36 +1,32 @@
 import { FindShallowUserByEmailUseCase } from "@/api/users/application/usecases/find-user-by-email.usecase";
-import { Auth } from "../../domain/models/auth";
+import { Auth } from "@/api/auth/domain/models/auth";
 import { LoginDTO } from "../dtos/login";
-import { InvalidGoogleAccessTokenException } from "../exceptions/invalid-google-access-token.exception";
+import { InvalidGoogleAccessTokenException } from "@/api/auth/application/exceptions/invalid-google-access-token.exception";
 import { logger } from "@/api/shared/infrastructure/config/logger";
 import { UserNotFoundException } from "@/api/users/application/exceptions/user-not-found.exception";
-import { InvalidEmailAccessException } from "../exceptions/invalid-email-access.exception";
+import { InvalidEmailAccessException } from "@/api/auth/application/exceptions/invalid-email-access.exception";
 import { User } from "@/api/users/domain/models/user.model";
 import { GoogleOAuthRepository } from "@/api/auth/domain/repositories/google-oauth.repository";
 import { GoogleOAuthRepositoryImpl } from "@/api/auth/infrastructure/adapters/google-oauth.repository-impl";
-import { JWTRepository } from "@/api/auth/domain/repositories/jwt.repository";
-import { JWTRepositoryImpl } from "@/api/auth/infrastructure/adapters/jwt.repository-impl";
-import { RefreshTokenPayload } from "../../domain/models/refresh-token-payload";
-import { AccessTokenPayload } from "../../domain/models/access-token-payload";
-import { ACCESS_TOKEN_TTL, REFRESH_TOKEN_TTL } from "@/api/shared/infrastructure/consts/token-ttl";
+import { GenerateTokensUseCase } from "@/api/auth/application/usecases/generate-tokens.usecase";
 
 interface LoginSSOUseCaseDependencies {
 	findShallowUserByEmailUseCase?: FindShallowUserByEmailUseCase;
-	jwtRepository?: JWTRepository;
 	googleOAuthRepository?: GoogleOAuthRepository;
+	generateTokensUseCase?: GenerateTokensUseCase;
 }
 
 export class LoginSSOUseCase {
 	private readonly findShallowUserByEmailUseCase: FindShallowUserByEmailUseCase;
 	private readonly googleOAuthRepository: GoogleOAuthRepository;
-	private readonly jwtRepository: JWTRepository;
+	private readonly generateTokensUseCase: GenerateTokensUseCase;
 
 	constructor(deps?: LoginSSOUseCaseDependencies) {
 		this.findShallowUserByEmailUseCase =
 			deps?.findShallowUserByEmailUseCase ??
 			new FindShallowUserByEmailUseCase();
-		this.jwtRepository =
-			deps?.jwtRepository ?? new JWTRepositoryImpl();
+		this.generateTokensUseCase =
+			deps?.generateTokensUseCase ?? new GenerateTokensUseCase();
 		this.googleOAuthRepository =
 			deps?.googleOAuthRepository ?? new GoogleOAuthRepositoryImpl();
 	}
@@ -55,7 +51,7 @@ export class LoginSSOUseCase {
 
 		const user = await this.findUserByEmail(email);
 
-		const auth = await this.generateAuth(user);
+		const auth = await this.generateTokensUseCase.execute(user);
 
 		logger.info("Use case LoginSSOUseCase completed successfully");
 
@@ -71,28 +67,5 @@ export class LoginSSOUseCase {
 
 			throw e;
 		}
-	}
-
-	private async generateAuth(user: User): Promise<Auth> {
-		const accessPayload: AccessTokenPayload = {
-			uuid: user.uuid,
-			email: user.email,
-			name: user.name,
-		};
-
-		const refreshPayload: RefreshTokenPayload = {
-			uuid: user.uuid
-		};
-
-		const accessToken = await this.jwtRepository.signToken(
-			accessPayload,
-			ACCESS_TOKEN_TTL,
-		);
-		const refreshToken = await this.jwtRepository.signToken(
-			refreshPayload,
-			REFRESH_TOKEN_TTL,
-		);
-
-		return new Auth(accessToken, refreshToken);
 	}
 }

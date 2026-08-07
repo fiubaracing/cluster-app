@@ -55,22 +55,23 @@ export default class AuthController {
 			return BlankTokenException.fromRefreshToken();
 		}
 
-		const newAccessToken = await this.refreshTokenUseCase.execute(refreshToken);
+		const auth: Auth = await this.refreshTokenUseCase.execute(refreshToken);
 
 		const response = ApiResponse.json('', { status: 200 });
-		this.setAuthCookie(response, "accessToken", newAccessToken, ACCESS_TOKEN_TTL_SECONDS);
+		this.setAuthCookie(response, "accessToken", auth.access.token, ACCESS_TOKEN_TTL_SECONDS);
+		this.setAuthCookie(response, "refreshToken", auth.refresh.token, REFRESH_TOKEN_TTL_SECONDS, "strict");
 
 		return response;
 	}
 
-	private setAuthCookie(response: ApiResponse, name: string, token: string, maxAge: number) {
+	private setAuthCookie(response: ApiResponse, name: string, token: string, maxAge: number, sameSite: "lax" | "strict" = "lax") {
 		response.cookies.set({
 			name,
 			value: token,
 			httpOnly: true,
 			secure: process.env.NODE_ENV === "production",
-			sameSite: "lax",
-			maxAge: maxAge, // 1 day in seconds
+			sameSite,
+			maxAge,
 			path: "/",
 		});
 	}

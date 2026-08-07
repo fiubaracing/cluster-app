@@ -10,5 +10,15 @@ services:
     volumes:
       - pg_data_18:/var/lib/postgresql
 
+  redis:
+    image: redis:8.10
+    container_name: cluster-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data_8:/data
+
 volumes:
   pg_data_18:
+  redis_data_8:

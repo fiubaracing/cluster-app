@@ -2,23 +2,28 @@ import { JWTRepository } from "@/api/auth/domain/repositories/jwt.repository";
 import { JWTRepositoryImpl } from "@/api/auth/infrastructure/adapters/jwt.repository-impl";
 import { RefreshTokenPayload } from "@/api/auth/domain/models/refresh-token-payload";
 import { FindShallowUserByUuidUseCase } from "@/api/users/application/usecases/find-shallow-user-by-uuid.usecase";
-import { AccessTokenPayload } from "@/api/auth/domain/models/access-token-payload";
 import { logger } from "@/api/shared/infrastructure/config/logger";
-import { ACCESS_TOKEN_TTL } from "@/api/shared/infrastructure/consts/token-ttl";
+import { GenerateTokensUseCase } from "./generate-tokens.usecase";
+import { Auth } from "../../domain/models/auth";
+import { deleteCached, getCached } from "@/api/shared/infrastructure/config/redis";
+import { InvalidJWTException } from "../../infrastructure/exceptions/invalid-jwt.exception";
 
 
 interface RefreshTokenUseCaseDependencies {
     jwtRepository?: JWTRepository;
     findShallowUserByUuidUseCase?: FindShallowUserByUuidUseCase;
+    generateTokensUseCase?: GenerateTokensUseCase;
 }
 
 export class RefreshTokenUseCase {
     private readonly jwtRepository: JWTRepository;
     private readonly findShallowUserByUuidUseCase: FindShallowUserByUuidUseCase;
+    private readonly generateTokensUseCase: GenerateTokensUseCase;
 
     constructor(deps?: RefreshTokenUseCaseDependencies) {
         this.jwtRepository = deps?.jwtRepository ?? new JWTRepositoryImpl();
         this.findShallowUserByUuidUseCase = deps?.findShallowUserByUuidUseCase ?? new FindShallowUserByUuidUseCase();
+        this.generateTokensUseCase = deps?.generateTokensUseCase ?? new GenerateTokensUseCase();
     }
 
     /**
@@ -28,24 +33,25 @@ export class RefreshTokenUseCase {
      * @throws {UserNotFoundException} if the user associated with the refresh token is not found.
      * @throws {InvalidJWTException} if the provided refresh token is invalid or cannot be decoded.
      */
-    public async execute(refreshToken: string): Promise<string> {
+    public async execute(refreshToken: string): Promise<Auth> {
         logger.info("Use case RefreshTokenUseCase started");
-        const { uuid }: RefreshTokenPayload = await this.jwtRepository.decodeToken(refreshToken);
+        const { uuid, sessionId }: RefreshTokenPayload = await this.jwtRepository.decodeToken(refreshToken);
 
-        const newAccessToken = await this.signNewAccessToken(uuid);
+        const oldToken = await getCached(`session:${uuid}:${sessionId}`);
         
+        if (!oldToken) {
+            throw InvalidJWTException.fromExpired();
+        }
+
+        if (oldToken !== refreshToken) {
+            await deleteCached(`session:${uuid}:${sessionId}`);
+            throw InvalidJWTException.fromExpired();
+        }
+
+        const user = await this.findShallowUserByUuidUseCase.execute(uuid);
+        const auth = await this.generateTokensUseCase.execute(user, sessionId);
+
         logger.info("Use case RefreshTokenUseCase completed successfully");
-        return newAccessToken;
-    }
-    
-    private async signNewAccessToken(userUuid: string): Promise<string> {
-        const user = await this.findShallowUserByUuidUseCase.execute(userUuid);
-        const payload: AccessTokenPayload = {
-            uuid: user.uuid,
-            email: user.email,
-            name: user.name,
-        };
-        
-        return await this.jwtRepository.signToken(payload, ACCESS_TOKEN_TTL);
+        return auth;
     }
 }
