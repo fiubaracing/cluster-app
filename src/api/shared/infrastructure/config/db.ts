@@ -1,9 +1,10 @@
 import 'dotenv/config';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
+import { logger } from './logger';
 
 const connectionString = `postgres://${process.env.POSTGRES_USER!}:${process.env.POSTGRES_PASSWORD!}@${process.env.POSTGRES_HOST!}:${process.env.POSTGRES_PORT!}/${process.env.POSTGRES_DB!}`;
-console.debug(`Connecting to database at: ${connectionString}`);
+logger.debug(`Connecting to database at: ${connectionString}`);
 
 const pool = new Pool({ 
   connectionString,

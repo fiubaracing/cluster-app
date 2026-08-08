@@ -5,6 +5,7 @@ import { TRACE_HEADER } from "../consts/header";
 import { ValidationError } from "yup";
 import { BadRequestException } from "../exceptions/bad-request.exception";
 import { ApiRequest, ApiResponse } from "@/api/shared/types/api";
+import { logger } from "../config/logger";
 
 export function withErrorHandler(handler: ApiHandler) {
 	return async function (this: unknown, req: ApiRequest, ...args: any[]) {
@@ -15,7 +16,7 @@ export function withErrorHandler(handler: ApiHandler) {
 			error.instance = req.method + " " + req.url;
 			error.extensions.traceId = req.headers.get(TRACE_HEADER) as string;
 
-			console.error("API Error", error);
+			logger.error("API Error", error);
 
 			return mapResponse(error);
 		}

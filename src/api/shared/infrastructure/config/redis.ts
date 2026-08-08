@@ -1,4 +1,5 @@
 import { createClient } from "redis";
+import { logger } from "./logger";
 
 const redis = createClient({
 	url: process.env.REDIS_URL || "redis://localhost:6379",
@@ -15,15 +16,15 @@ const redis = createClient({
 });
 
 redis.on("error", (err) =>
-	console.error("Redis connection failed:", err.message),
+	logger.error("Redis connection failed:", err.message),
 );
 
 try {
 	await redis.connect();
-	console.log("Connected to Redis!");
+	logger.info("Connected to Redis!");
 } catch (error) {
 	// THIS will now run after the 3rd failed attempt!
-	console.error("Failed to connect to Redis on startup. Exiting...");
+	logger.error("Failed to connect to Redis on startup. Exiting...");
 	process.exit(1);
 }
 
@@ -46,7 +47,7 @@ async function getCached<T>(key: string): Promise<T | null> {
 		// JSON.parse returns 'any' by default, so we cast it to T
 		return JSON.parse(jsonString) as T;
 	} catch (error) {
-		console.error(`Failed to parse JSON for key ${key}:`, error);
+		logger.error(`Failed to parse JSON for key ${key}:`, error);
 		return null;
 	}
 }

@@ -21,13 +21,29 @@ const emailFormat = format((info) => {
 	return info;
 });
 
+const customLayout = format.printf(({ timestamp, level, message, traceId, email }) => {
+	const logParts = [`[${timestamp}]`, `[${level.toUpperCase()}]`];
+
+	if (traceId) {
+		logParts.push(`[${traceId}]`);
+	}
+
+	if (email) {
+		logParts.push(`[${email}]`);
+	}
+
+	logParts.push(`${message}`);
+
+	return logParts.join(" ");
+});
+
 export const logger = createLogger({
 	level: process.env.NODE_ENV === "development" ? "debug" : "info",
 	format: format.combine(
 		format.timestamp(),
 		traceIdFormat(), // Injects traceId if available
 		emailFormat(), // Injects email if available
-		format.json(), // Outputs clean JSON for production log viewers
+		customLayout
 	),
 	transports: [
 		new transports.Console(),
