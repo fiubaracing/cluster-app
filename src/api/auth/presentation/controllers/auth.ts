@@ -15,6 +15,7 @@ import { ApiRequest, ApiResponse } from "@/api/shared/types/api";
 import { BlankTokenException } from "../../application/exceptions/blank-token.exception";
 import { RefreshTokenUseCase } from "../../application/usecases/refresh-token.usecase";
 import { ACCESS_TOKEN_TTL_SECONDS, REFRESH_TOKEN_TTL_SECONDS } from "@/api/shared/infrastructure/consts/token-ttl";
+import { constants } from 'http2'
 
 interface AuthControllerDependencies {
 	loginSsoUseCase?: LoginSSOUseCase;
@@ -41,9 +42,9 @@ export default class AuthController {
 		const dto: LoginDTO = AuthMapper.toLoginDTO(body);
 		const auth: Auth = await this.loginSsoUseCase.execute(dto);
 
-		const response = ApiResponse.json('', { status: 200 });
+		const response = ApiResponse.json('', { status: constants.HTTP_STATUS_OK });
 		this.setAuthCookie(response, "accessToken", auth.access.token, ACCESS_TOKEN_TTL_SECONDS);
-		this.setAuthCookie(response, "refreshToken", auth.refresh.token, REFRESH_TOKEN_TTL_SECONDS);
+		this.setAuthCookie(response, "refreshToken", auth.refresh.token, REFRESH_TOKEN_TTL_SECONDS, "strict");
 
 		return response;
 	}
@@ -57,7 +58,7 @@ export default class AuthController {
 
 		const auth: Auth = await this.refreshTokenUseCase.execute(refreshToken);
 
-		const response = ApiResponse.json('', { status: 200 });
+		const response = ApiResponse.json('', { status: constants.HTTP_STATUS_OK });
 		this.setAuthCookie(response, "accessToken", auth.access.token, ACCESS_TOKEN_TTL_SECONDS);
 		this.setAuthCookie(response, "refreshToken", auth.refresh.token, REFRESH_TOKEN_TTL_SECONDS, "strict");
 
