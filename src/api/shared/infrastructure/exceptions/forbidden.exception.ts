@@ -5,7 +5,7 @@ export class ForbiddenException extends ApiException {
   constructor(
     title: string,
     detail: string,
-    errorCode: string,
+    errorCode?: string,
     errorArgs?: ApiExceptionArgs,
   ) {
     super(

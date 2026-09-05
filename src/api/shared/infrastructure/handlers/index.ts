@@ -5,7 +5,10 @@ import { withErrorHandler } from "./exception";
 import { ApiHandler } from "../../types/api";
 import * as yup from "yup";
 import { ApiRequest } from "@/api/shared/types/api";
-import { withAuth } from "./auth";
+import { withAuthentication } from "./authentication";
+import { PermissionSuffix } from "@/api/roles/domain/models/permission.model";
+import { Module } from "@/api/roles/domain/models/module.model";
+import { withAuthorization } from "./authorization";
 
 export const execFile = promisify(execFileNode);
 
@@ -15,9 +18,20 @@ export interface Middlewares {
 	auth?: boolean;
 }
 
+export interface EndpointOptions extends Middlewares {
+	module?: Module;
+	permission?: PermissionSuffix;
+}
+
 const wrapRequest = <T extends ApiHandler>(
 	handler: T,
-	{ logging = true, errorHandler = true, auth = true }: Middlewares = {},
+	{
+		logging = true,
+		errorHandler = true,
+		auth = true,
+		module = undefined,
+		permission = undefined,
+	}: EndpointOptions = {},
 ) => {
 	let wrappedHandler: ApiHandler = function (
 		this: unknown,
@@ -27,14 +41,15 @@ const wrapRequest = <T extends ApiHandler>(
 		return handler.call(this, req, ...args);
 	};
 
+	if (module && permission) wrappedHandler = withAuthorization(wrappedHandler, module, permission);
 	if (logging) wrappedHandler = withLogging(wrappedHandler);
-	if (auth) wrappedHandler = withAuth(wrappedHandler);
+	if (auth) wrappedHandler = withAuthentication(wrappedHandler);
 	if (errorHandler) wrappedHandler = withErrorHandler(wrappedHandler);
 
 	return wrappedHandler as T;
 };
 
-const createDecorator = (options: Middlewares = {}): MethodDecorator => {
+const createDecorator = (options: EndpointOptions = {}): MethodDecorator => {
 	return (_target, _propertyKey, descriptor) => {
 		const method = descriptor.value;
 		if (typeof method === "function") {
@@ -46,7 +61,7 @@ const createDecorator = (options: Middlewares = {}): MethodDecorator => {
 	};
 };
 
-export function Endpoint(options?: Middlewares): MethodDecorator;
+export function Endpoint(options?: EndpointOptions): MethodDecorator;
 export function Endpoint(
 	target: object,
 	propertyKey: string | symbol,

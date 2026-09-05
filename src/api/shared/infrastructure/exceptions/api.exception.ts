@@ -10,7 +10,7 @@ export class ApiException extends Error {
     title: string,
     detail: string,
     status: number,
-    errorCode: string,
+    errorCode?: string,
     errorArgs?: ApiExceptionArgs
   ) {
     super(detail);
