@@ -1,4 +1,6 @@
+import { RoleType } from "@/api/roles/domain/models/role.model";
 import { ActiveStateType } from "@/api/shared/domain/enums/active-state";
+import { Permissions } from "@/api/roles/domain/models/permissions.model";
 
 export class User {
     uuid!: string;
@@ -11,4 +13,9 @@ export class User {
     updatedBy?: number | null;
     deactivatedAt?: Date | null;
     deactivatedBy?: number | null;
+}
+
+export class UserWithRolesAndPermissions extends User {
+    roles!: Set<RoleType>;
+    permissions!: Permissions;
 }

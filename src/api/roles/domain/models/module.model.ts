@@ -1,0 +1,1 @@
+export type Module = 'USERS' | 'TEAMS' | 'HELYX';

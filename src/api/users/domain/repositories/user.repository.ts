@@ -1,5 +1,5 @@
 import { ActiveStateType } from "@/api/shared/domain/enums/active-state";
-import { User } from "@/api/users/domain/models/user.model";
+import { User, UserWithRolesAndPermissions } from "@/api/users/domain/models/user.model";
 
 export interface UserRepository {
 	/**
@@ -23,4 +23,15 @@ export interface UserRepository {
 		uuid: string,
 		state: ActiveStateType,
 	): Promise<User | null>;
+
+	/**
+	 * Finds a user by their UUID and active state, including their roles and permissions.
+	 * @param uuid - The UUID of the user to find.
+	 * @param state - The active state of the user to filter by.
+	 * @returns A promise that resolves to the User object if found, or null if not found.
+	 */
+	findByUuidAndStateWithRolesAndPermissions(
+		uuid: string,
+		state: ActiveStateType,
+	): Promise<UserWithRolesAndPermissions | null>;
 }

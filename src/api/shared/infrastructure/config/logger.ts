@@ -1,12 +1,9 @@
-import { AsyncLocalStorage } from "node:async_hooks";
 import { createLogger, format, transports } from "winston";
 import DailyRotateFile from "winston-daily-rotate-file";
-
-export const traceStorage = new AsyncLocalStorage<string>();
-export const emailStorage = new AsyncLocalStorage<string>();
+import context from "./store";
 
 const traceIdFormat = format((info) => {
-	const traceId = traceStorage.getStore();
+	const traceId = context.store?.traceId;
 	if (traceId) {
 		info.traceId = traceId;
 	}
@@ -14,7 +11,7 @@ const traceIdFormat = format((info) => {
 });
 
 const emailFormat = format((info) => {
-	const email = emailStorage.getStore();
+	const email = context.store?.user.email;
 	if (email) {
 		info.email = email;
 	}

@@ -1,3 +1,6 @@
+import { Module } from "@/api/roles/domain/models/module.model";
+import { Permission } from "@/api/roles/domain/models/permission.model";
+import { RoleType } from "@/api/roles/domain/models/role.model";
 import { ActiveStateType } from "@/api/shared/domain/enums/active-state";
 
 export interface UserEntity {
@@ -13,3 +16,8 @@ export interface UserEntity {
     deactivatedAt: Date | null;
     deactivatedBy: number | null;
 }
+
+export type UserEntityWithRolesAndPermissions = UserEntity & {
+    roles: Set<RoleType>;
+    permissions: Map<Module, Set<Permission>>;
+};
