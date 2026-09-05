@@ -1,4 +1,4 @@
-import { db } from "@/api/shared/config/db";
+import { db } from "@/api/shared/infrastructure/config/db";
 
 export async function GET() {
 	return Response.json({

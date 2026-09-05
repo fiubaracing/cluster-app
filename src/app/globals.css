@@ -1,26 +1,77 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+  /* Base Layout */
+  --background: #f8fafc; /* Very light cool gray */
+  --foreground: #020617; /* Very dark slate */
+  
+  /* Surfaces (Cards, Modals, Dropdowns) */
+  --surface: #ffffff; /* Pure white for contrast against background */
+  --border: #e2e8f0;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* Brand Colors */
+  --primary: #2daafc; /* Your bright blue */
+  --primary-foreground: #020617; /* Dark text for readable contrast on the bright blue */
+  
+  --secondary: #011791; /* Your deep navy */
+  --secondary-foreground: #ffffff; /* White text for contrast on navy */
+
+  /* Accents & Muted (Hover states, secondary text) */
+  --accent: #e0f2fe; /* Very light blue for subtle hover states */
+  --accent-foreground: #011791;
+  --muted: #64748b; /* Gray text for less important info */
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    /* Base Layout */
+    --background: #020617; /* Very deep slate (almost black) */
+    --foreground: #f8fafc; /* Cool white text */
+    
+    /* Surfaces */
+    --surface: #0f172a; /* Slightly lighter than background to make cards pop */
+    --border: #1e293b;
+
+    /* Brand Colors */
+    --primary: #2daafc; /* Stays vibrant in dark mode */
+    --primary-foreground: #020617;
+    
+    --secondary: #011791; 
+    --secondary-foreground: #ffffff;
+
+    /* Accents & Muted */
+    --accent: #1e3a8a; /* Darker blue for dark mode hover states */
+    --accent-foreground: #ffffff;
+    --muted: #94a3b8;
   }
 }
 
+/* Map CSS variables to Tailwind v4 utility classes */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  
+  --color-surface: var(--surface);
+  --color-border: var(--border);
+  
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  
+  --color-muted: var(--muted);
+  
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+
 body {
-  background: var(--background);
+  background-color: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), sans-serif;
 }
