@@ -1,8 +1,61 @@
-import { pgSchema, pgTable, serial, uuid, varchar, timestamp, integer, foreignKey, primaryKey, unique, check } from "drizzle-orm/pg-core"
+import { pgSchema, pgTable, serial, integer, varchar, uuid, text, interval, timestamp, foreignKey, primaryKey, unique, check } from "drizzle-orm/pg-core"
 import { sql } from "drizzle-orm"
 
 export const core = pgSchema("core");
 
+
+export const modulesInCore = core.table("modules", {
+	id: serial().primaryKey(),
+	name: varchar({ length: 255 }).notNull(),
+	description: text(),
+}, (table) => [
+	unique("modules_name_key").on(table.name),]);
+
+export const permissionsInCore = core.table("permissions", {
+	id: serial().primaryKey(),
+	name: varchar({ length: 255 }).notNull(),
+	description: text(),
+}, (table) => [
+	unique("permissions_name_key").on(table.name),]);
+
+export const rolePermissionsInCore = core.table("role_permissions", {
+	roleId: integer("role_id").notNull().references(() => rolesInCore.id, { onDelete: "cascade" } ),
+	permissionId: integer("permission_id").notNull().references(() => permissionsInCore.id, { onDelete: "cascade" } ),
+	moduleId: integer("module_id").notNull().references(() => modulesInCore.id, { onDelete: "cascade" } ),
+}, (table) => [
+	primaryKey({ columns: [table.roleId, table.permissionId, table.moduleId], name: "role_permissions_pkey"}),
+]);
+
+export const rolesInCore = core.table("roles", {
+	id: serial().primaryKey(),
+	name: varchar({ length: 255 }).notNull(),
+	description: text(),
+	uuid: uuid().defaultRandom().notNull(),
+}, (table) => [
+	unique("roles_name_key").on(table.name),	unique("roles_uuid_key").on(table.uuid),]);
+
+export const userResourceLimitsInCore = core.table("user_resource_limits", {
+	id: serial().primaryKey(),
+	userId: integer("user_id").notNull().references(() => usersInCore.id, { onDelete: "cascade" } ),
+	runtimeHours: interval("runtime_hours"),
+	maxMemory: integer("max_memory"),
+	maxTasks: integer("max_tasks").notNull(),
+	maxProjects: integer("max_projects"),
+});
+
+export const userRolesInCore = core.table("user_roles", {
+	userId: integer("user_id").notNull().references(() => usersInCore.id, { onDelete: "cascade" } ),
+	roleId: integer("role_id").notNull().references(() => rolesInCore.id, { onDelete: "cascade" } ),
+	state: varchar({ length: 10 }).notNull(),
+	createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`),
+	createdBy: integer("created_by").references(() => usersInCore.id, { onDelete: "set null" } ),
+	updatedAt: timestamp("updated_at").default(sql`CURRENT_TIMESTAMP`),
+	updatedBy: integer("updated_by").references(() => usersInCore.id, { onDelete: "set null" } ),
+	deactivatedAt: timestamp("deactivated_at"),
+	deactivatedBy: integer("deactivated_by").references(() => usersInCore.id, { onDelete: "set null" } ),
+}, (table) => [
+	primaryKey({ columns: [table.userId, table.roleId], name: "user_roles_pkey"}),
+check("user_roles_state_check", sql`((state)::text = ANY ((ARRAY['ACTIVE'::character varying, 'INACTIVE'::character varying])::text[]))`),]);
 
 export const usersInCore = core.table("users", {
 	id: serial().primaryKey(),
