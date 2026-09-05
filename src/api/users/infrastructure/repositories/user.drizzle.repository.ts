@@ -1,6 +1,18 @@
 import { db } from "@/api/shared/infrastructure/config/db";
-import { modulesInCore, permissionsInCore, rolePermissionsInCore, rolesInCore, userRolesInCore, usersInCore } from "@/db/migrations/schema";
-import { UserEntity, UserEntityWithRolesAndPermissions } from "@/api/users/infrastructure/entities/user.entity";
+import {
+	modulesInCore,
+	permissionsInCore,
+	rolePermissionsInCore,
+	rolesInCore,
+	teamsInCore,
+	userRolesInCore,
+	usersInCore,
+	userTeamsInCore,
+} from "@/db/migrations/schema";
+import {
+	UserEntity,
+	UserEntityWithRolesPermissionsAndTeams,
+} from "@/api/users/infrastructure/entities/user.entity";
 import { ActiveStateType } from "@/api/shared/domain/enums/active-state";
 import { and, eq } from "drizzle-orm";
 import { RoleType } from "@/api/roles/domain/models/role.model";
@@ -40,10 +52,14 @@ export class UserDrizzleRepository {
 			});
 	}
 
-	static async findByUuidAndStateWithRolesAndPermissions(uuid: string, state: ActiveStateType): Promise<UserEntityWithRolesAndPermissions | null> {
+	static async findByUuidAndStateWithRolesPermissionsAndTeams(
+		uuid: string,
+		state: ActiveStateType,
+	): Promise<UserEntityWithRolesPermissionsAndTeams | null> {
 		const rows = await db
 			.select({
 				user: usersInCore,
+				teamUuid: teamsInCore.uuid,
 				roleName: rolesInCore.name,
 				moduleName: modulesInCore.name,
 				permissionName: permissionsInCore.name,
@@ -66,8 +82,18 @@ export class UserDrizzleRepository {
 				modulesInCore,
 				eq(rolePermissionsInCore.moduleId, modulesInCore.id),
 			)
+			.leftJoin(teamsInCore, eq(userTeamsInCore.teamId, teamsInCore.id))
+			.leftJoin(
+				userTeamsInCore,
+				eq(usersInCore.id, userTeamsInCore.userId),
+			)
 			.where(
-				and(eq(usersInCore.uuid, uuid), eq(usersInCore.state, state)),
+				and(
+					eq(usersInCore.uuid, uuid),
+					eq(usersInCore.state, state),
+					eq(userTeamsInCore.state, state),
+					eq(userRolesInCore.state, state),
+				),
 			);
 
 		if (rows.length === 0) {
@@ -77,6 +103,7 @@ export class UserDrizzleRepository {
 		const user = rows[0].user as UserEntity;
 		const roles = new Set<RoleType>();
 		const permissions = new Map<Module, Set<Permission>>();
+		const teams = new Set<string>();
 
 		for (const row of rows) {
 			if (row.roleName) {
@@ -85,10 +112,19 @@ export class UserDrizzleRepository {
 
 			if (row.moduleName && row.permissionName) {
 				if (!permissions.has(row.moduleName as Module)) {
-					permissions.set(row.moduleName as Module, new Set<Permission>());
+					permissions.set(
+						row.moduleName as Module,
+						new Set<Permission>(),
+					);
 				}
 
-				permissions.get(row.moduleName as Module)!.add(row.permissionName as Permission);
+				permissions
+					.get(row.moduleName as Module)!
+					.add(row.permissionName as Permission);
+			}
+
+			if (row.teamUuid) {
+				teams.add(row.teamUuid);
 			}
 		}
 
@@ -96,6 +132,7 @@ export class UserDrizzleRepository {
 			...user,
 			roles,
 			permissions,
+			teams,
 		};
 	}
 }

@@ -3,19 +3,20 @@ import { ActiveStateType } from "@/api/shared/domain/enums/active-state";
 import { Permissions } from "@/api/roles/domain/models/permissions.model";
 
 export class User {
-    uuid!: string;
-    email!: string;
-    name!: string;
-    state?: ActiveStateType;
-    createdAt?: Date | null;
-    createdBy?: number | null;
-    updatedAt?: Date | null;
-    updatedBy?: number | null;
-    deactivatedAt?: Date | null;
-    deactivatedBy?: number | null;
+	uuid!: string;
+	email!: string;
+	name!: string;
+	state?: ActiveStateType;
+	createdAt?: Date | null;
+	createdBy?: number | null;
+	updatedAt?: Date | null;
+	updatedBy?: number | null;
+	deactivatedAt?: Date | null;
+	deactivatedBy?: number | null;
 }
 
-export class UserWithRolesAndPermissions extends User {
-    roles!: Set<RoleType>;
-    permissions!: Permissions;
+export class UserWithRolesPermissionsAndTeams extends User {
+	roles!: Set<RoleType>;
+	permissions!: Permissions;
+	teams!: Set<string>;
 }

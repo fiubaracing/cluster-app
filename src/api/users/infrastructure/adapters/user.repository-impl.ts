@@ -2,7 +2,10 @@ import { UserRepository } from "@/api/users/domain/repositories/user.repository"
 import { ActiveStateType } from "@/api/shared/domain/enums/active-state";
 import { UserDrizzleRepository } from "@/api/users/infrastructure/repositories/user.drizzle.repository";
 import { UserEntityMapper } from "./mappers/user-entity.mapper";
-import { User, UserWithRolesAndPermissions } from "../../domain/models/user.model";
+import {
+	User,
+	UserWithRolesPermissionsAndTeams,
+} from "../../domain/models/user.model";
 
 export class UserRepositoryImpl implements UserRepository {
 	async findShallowByEmailAndState(
@@ -26,12 +29,12 @@ export class UserRepositoryImpl implements UserRepository {
 		);
 	}
 
-	async findByUuidAndStateWithRolesAndPermissions(
+	async findByUuidAndStateWithRolesPermissionsAndTeams(
 		uuid: string,
 		state: ActiveStateType,
-	): Promise<UserWithRolesAndPermissions | null> {
-		return UserEntityMapper.toDomainWithRolesAndPermissions(
-			await UserDrizzleRepository.findByUuidAndStateWithRolesAndPermissions(
+	): Promise<UserWithRolesPermissionsAndTeams | null> {
+		return UserEntityMapper.toDomainWithRolesPermissionsAndTeams(
+			await UserDrizzleRepository.findByUuidAndStateWithRolesPermissionsAndTeams(
 				uuid,
 				state,
 			),

@@ -1,5 +1,11 @@
-import { UserEntity, UserEntityWithRolesAndPermissions } from "@/api/users/infrastructure/entities/user.entity";
-import { User, UserWithRolesAndPermissions } from "@/api/users/domain/models/user.model";
+import {
+	UserEntity,
+	UserEntityWithRolesPermissionsAndTeams,
+} from "@/api/users/infrastructure/entities/user.entity";
+import {
+	User,
+	UserWithRolesPermissionsAndTeams,
+} from "@/api/users/domain/models/user.model";
 import { Permissions } from "@/api/roles/domain/models/permissions.model";
 
 export class UserEntityMapper {
@@ -15,17 +21,20 @@ export class UserEntityMapper {
 		return user;
 	}
 
-	static toDomainWithRolesAndPermissions(entity: UserEntityWithRolesAndPermissions | null): UserWithRolesAndPermissions | null {
+	static toDomainWithRolesPermissionsAndTeams(
+		entity: UserEntityWithRolesPermissionsAndTeams | null,
+	): UserWithRolesPermissionsAndTeams | null {
 		if (!entity) {
 			return null;
 		}
 
-		const user = new UserWithRolesAndPermissions();
+		const user = new UserWithRolesPermissionsAndTeams();
 		user.uuid = entity.uuid;
 		user.email = entity.email;
 		user.name = entity.name;
 		user.roles = entity.roles;
 		user.permissions = new Permissions(entity.permissions);
+		user.teams = entity.teams;
 		return user;
 	}
 }
