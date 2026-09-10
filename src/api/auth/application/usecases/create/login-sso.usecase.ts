@@ -1,6 +1,6 @@
-import { FindShallowUserByEmailUseCase } from "@/api/users/application/usecases/find-user-by-email.usecase";
+import { FindShallowUserByEmailUseCase } from "@/api/users/application/usecases/find/find-user-by-email.usecase";
 import { Auth } from "@/api/auth/domain/models/auth";
-import { LoginDTO } from "../dtos/login";
+import { LoginDTO } from "../../dtos/login";
 import { InvalidGoogleAccessTokenException } from "@/api/auth/application/exceptions/invalid-google-access-token.exception";
 import { logger } from "@/api/shared/infrastructure/config/logger";
 import { UserNotFoundException } from "@/api/users/application/exceptions/user-not-found.exception";
@@ -8,7 +8,7 @@ import { InvalidEmailAccessException } from "@/api/auth/application/exceptions/i
 import { User } from "@/api/users/domain/models/user.model";
 import { GoogleOAuthRepository } from "@/api/auth/domain/repositories/google-oauth.repository";
 import { GoogleOAuthRepositoryImpl } from "@/api/auth/infrastructure/adapters/google-oauth.repository-impl";
-import { GenerateTokensUseCase } from "@/api/auth/application/usecases/generate-tokens.usecase";
+import { GenerateTokensUseCase } from "@/api/auth/application/usecases/generate/generate-tokens.usecase";
 
 interface LoginSSOUseCaseDependencies {
 	findShallowUserByEmailUseCase?: FindShallowUserByEmailUseCase;

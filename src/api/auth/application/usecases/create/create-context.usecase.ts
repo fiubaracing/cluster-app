@@ -2,7 +2,7 @@ import { JWTRepository } from "@/api/auth/domain/repositories/jwt.repository";
 import { JWTRepositoryImpl } from "@/api/auth/infrastructure/adapters/jwt.repository-impl";
 import { AccessTokenPayload } from "@/api/auth/domain/models/access-token-payload";
 import { Context } from "@/api/shared/infrastructure/config/store";
-import { FindUserByUuidWithRolesPermissionsAndTeamsUseCase } from "@/api/users/application/usecases/find-user-by-uuid-with-roles-and-permissions.usecase";
+import { FindUserByUuidWithRolesPermissionsAndTeamsUseCase } from "@/api/users/application/usecases/find/find-user-by-uuid-with-roles-and-permissions.usecase";
 
 interface CreateContextUseCaseDependencies {
 	jwtRepository?: JWTRepository;

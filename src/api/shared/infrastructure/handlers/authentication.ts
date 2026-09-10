@@ -3,7 +3,7 @@ import context from "../config/store";
 import { Context } from "@/api/shared/infrastructure/config/store";
 import { InvalidJWTException } from "@/api/auth/infrastructure/exceptions/invalid-jwt.exception";
 import { ApiRequest } from "@/api/shared/types/api";
-import { CreateContextUseCase } from "@/api/auth/application/usecases/create-context.usecase";
+import { CreateContextUseCase } from "@/api/auth/application/usecases/create/create-context.usecase";
 
 interface AuthMiddlewareDependencies {
 	createContextUseCase?: CreateContextUseCase;

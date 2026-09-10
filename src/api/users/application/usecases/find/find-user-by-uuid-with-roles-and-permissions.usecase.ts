@@ -2,7 +2,7 @@ import { UserRepository } from "@/api/users/domain/repositories/user.repository"
 import { UserRepositoryImpl } from "@/api/users/infrastructure/adapters/user.repository-impl";
 import { UserWithRolesPermissionsAndTeams } from "@/api/users/domain/models/user.model";
 import { logger } from "@/api/shared/infrastructure/config/logger";
-import { UserNotFoundException } from "../exceptions/user-not-found.exception";
+import { UserNotFoundException } from "../../exceptions/user-not-found.exception";
 import { ActiveState } from "@/api/shared/domain/enums/active-state";
 
 interface FindUserByUuidWithRolesPermissionsAndTeamsUseCaseDependencies {

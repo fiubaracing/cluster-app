@@ -1,4 +1,4 @@
-import { FindUserInContextUseCase } from "@/api/users/application/usecases/find-user-in-context.usecase";
+import { FindUserInContextUseCase } from "@/api/users/application/usecases/find/find-user-in-context.usecase";
 import { UserWithRolesPermissionsAndTeams } from "@/api/users/domain/models/user.model";
 import { DataScope } from "@/api/auth/domain/models/data-scope";
 import { Module } from "@/api/roles/domain/models/module.model";
@@ -45,9 +45,7 @@ export class GenerateDataScopeUseCase {
 				Array.from(user.teams)
 			:	null;
 
-		logger.info(
-			"Use case GenerateDataScopeUseCase completed successfully",
-		);
+		logger.info("Use case GenerateDataScopeUseCase completed successfully");
 		return dataScope;
 	}
 }
