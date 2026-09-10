@@ -18,7 +18,7 @@ export default {
 		);
 	},
 
-	run(callback: (ctx: Context, ...args: any[]) => Promise<any>) {
-		return context.run(this.store, () => callback(this.store));
+	run(callback: (ctx: Context, ...args: any[]) => Promise<any>, _ctx?: Context) {
+		return context.run(_ctx ?? this.store, () => callback(this.store));
 	},
 };
