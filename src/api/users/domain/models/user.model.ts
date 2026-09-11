@@ -20,3 +20,7 @@ export class UserWithRolesPermissionsAndTeams extends User {
 	permissions!: Permissions;
 	teams!: Set<string>;
 }
+
+export type UserWithCreator = Omit<User, "createdBy"> & {
+	createdBy: User | null;
+};

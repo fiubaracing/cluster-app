@@ -11,13 +11,20 @@ import {
 } from "@/db/migrations/schema";
 import {
 	UserEntity,
+	UserEntityWithCreator,
 	UserEntityWithRolesPermissionsAndTeams,
 } from "@/api/users/infrastructure/entities/user.entity";
-import { ActiveStateType } from "@/api/shared/domain/enums/active-state";
-import { and, eq } from "drizzle-orm";
+import {
+	ActiveState,
+	ActiveStateType,
+} from "@/api/shared/domain/enums/active-state";
+import { aliasedTable, and, eq } from "drizzle-orm";
 import { RoleType } from "@/api/roles/domain/models/role.model";
 import { Module } from "@/api/roles/domain/models/module.model";
 import { Permission } from "@/api/roles/domain/models/permission.model";
+import context from "@/api/shared/infrastructure/config/store";
+
+const creator = aliasedTable(usersInCore, "creator");
 
 export class UserDrizzleRepository {
 	static async findShallowByEmailAndState(
@@ -33,6 +40,26 @@ export class UserDrizzleRepository {
 			.limit(1)
 			.then((result) => {
 				return result.length === 0 ? null : (result[0] as UserEntity);
+			});
+	}
+
+	static async findShallowByEmailAndStateWithCreator(
+		email: string,
+		state: ActiveStateType,
+	): Promise<UserEntityWithCreator | null> {
+		return await db
+			.select({
+				...usersInCore._.columns,
+				createdBy: creator._.columns,
+			})
+			.from(usersInCore)
+			.where(
+				and(eq(usersInCore.email, email), eq(usersInCore.state, state)),
+			)
+			.leftJoin(creator, eq(usersInCore.createdBy, creator.id))
+			.limit(1)
+			.then((result) => {
+				return result.length === 0 ? null : (result[0] as UserEntityWithCreator);
 			});
 	}
 
@@ -134,5 +161,38 @@ export class UserDrizzleRepository {
 			permissions,
 			teams,
 		};
+	}
+
+	static async create(user: UserEntity): Promise<UserEntity> {
+		const [createdUser] = await db
+			.insert(usersInCore)
+			.values(user)
+			.returning();
+		return createdUser as UserEntity;
+	}
+
+	static async update(user: UserEntity): Promise<UserEntity> {
+		const [updatedUser] = await db
+			.update(usersInCore)
+			.set(user)
+			.where(eq(usersInCore.uuid, user.uuid))
+			.returning();
+		return updatedUser as UserEntity;
+	}
+
+	static async findUserInContext(): Promise<UserEntity | null> {
+		return await db
+			.select()
+			.from(usersInCore)
+			.where(
+				and(
+					eq(usersInCore.uuid, context.store.user.uuid),
+					eq(usersInCore.state, ActiveState.ACTIVE),
+				),
+			)
+			.limit(1)
+			.then((result) => {
+				return result.length === 0 ? null : (result[0] as UserEntity);
+			});
 	}
 }
