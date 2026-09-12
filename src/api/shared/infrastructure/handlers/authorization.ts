@@ -8,9 +8,14 @@ import { ForbiddenException } from "../exceptions/forbidden.exception";
 export function withAuthorization(
     handler: ApiHandler,
     module: Module,
-    permission: PermissionSuffix,
+    permission: PermissionSuffix | PermissionSuffix[],
 ) {
-    if (!context.store.user.permissions.hasSuffix(module, permission)) {
+    const permissions = Array.isArray(permission) ? permission : [permission];
+    const hasPermission = permissions.some((perm) =>
+        context.store.user.permissions.hasSuffix(module, perm),
+    );
+
+    if (!hasPermission) {
         throw new ForbiddenException(
             `Forbidden`,
             `User does not have permission ${permission} for module ${module}`,

@@ -58,7 +58,7 @@ export default class UserController {
 
 	@Endpoint({
 		module: ModuleEnum.USERS,
-		permission: PermissionSuffixEnum.EDIT,
+		permission: [PermissionSuffixEnum.ADD, PermissionSuffixEnum.EDIT],
 	})
 	async upsertUser(req: ApiRequest): Promise<ApiResponse> {
 		const rawBody = await parseJSON(req);

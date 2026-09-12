@@ -20,7 +20,7 @@ export interface Middlewares {
 
 export interface EndpointOptions extends Middlewares {
 	module?: Module;
-	permission?: PermissionSuffix;
+	permission?: PermissionSuffix | PermissionSuffix[];
 }
 
 const wrapRequest = <T extends ApiHandler>(

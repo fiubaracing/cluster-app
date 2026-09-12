@@ -27,7 +27,7 @@ export default class TeamController {
 
     @Endpoint({
         module: ModuleEnum.TEAMS,
-        permission: PermissionSuffixEnum.EDIT,
+        permission: [PermissionSuffixEnum.ADD, PermissionSuffixEnum.EDIT],
     })
     async upsertTeam(req: ApiRequest): Promise<ApiResponse> {
         const rawBody = await parseJSON(req);
