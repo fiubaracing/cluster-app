@@ -23,6 +23,7 @@ import { RoleType } from "@/api/roles/domain/models/role.model";
 import { Module } from "@/api/roles/domain/models/module.model";
 import { Permission } from "@/api/roles/domain/models/permission.model";
 import context from "@/api/shared/infrastructure/config/store";
+import { UUID } from "@/api/shared/domain/models/uuid";
 
 const creator = aliasedTable(usersInCore, "creator");
 
@@ -59,12 +60,14 @@ export class UserDrizzleRepository {
 			.leftJoin(creator, eq(usersInCore.createdBy, creator.id))
 			.limit(1)
 			.then((result) => {
-				return result.length === 0 ? null : (result[0] as UserEntityWithCreator);
+				return result.length === 0 ?
+						null
+					:	(result[0] as UserEntityWithCreator);
 			});
 	}
 
 	static async findByUuidAndState(
-		uuid: string,
+		uuid: UUID,
 		state: ActiveStateType,
 	): Promise<UserEntity | null> {
 		return await db
@@ -80,7 +83,7 @@ export class UserDrizzleRepository {
 	}
 
 	static async findByUuidAndStateWithRolesPermissionsAndTeams(
-		uuid: string,
+		uuid: UUID,
 		state: ActiveStateType,
 	): Promise<UserEntityWithRolesPermissionsAndTeams | null> {
 		const rows = await db

@@ -1,5 +1,7 @@
+import { UUID } from "@/api/shared/domain/models/uuid";
+
 export class UserResponse {
-    uuid!: string;
+	uuid!: UUID;
 	email!: string;
 	name!: string;
 }

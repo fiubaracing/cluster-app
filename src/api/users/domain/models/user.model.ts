@@ -1,9 +1,10 @@
 import { RoleType } from "@/api/roles/domain/models/role.model";
 import { ActiveStateType } from "@/api/shared/domain/enums/active-state";
 import { Permissions } from "@/api/roles/domain/models/permissions.model";
+import { UUID } from "@/api/shared/domain/models/uuid";
 
 export class User {
-	uuid!: string;
+	uuid!: UUID;
 	email!: string;
 	name!: string;
 	state?: ActiveStateType;

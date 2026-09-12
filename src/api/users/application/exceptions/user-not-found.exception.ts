@@ -1,5 +1,6 @@
 import { ApiExceptionArgs } from "@/api/shared/infrastructure/exceptions/api.exception";
 import { NotFoundException } from "@/api/shared/infrastructure/exceptions/not-found.exception";
+import { UUID } from "@/api/shared/domain/models/uuid";
 
 export class UserNotFoundException extends NotFoundException {
 	private constructor(
@@ -20,7 +21,7 @@ export class UserNotFoundException extends NotFoundException {
 		);
 	}
 
-	static fromUuid(uuid: string) {
+	static fromUuid(uuid: UUID) {
 		return new UserNotFoundException(
 			"User not found",
 			`No user was found with the UUID: ${uuid}`,

@@ -4,6 +4,7 @@ import { UserWithRolesPermissionsAndTeams } from "@/api/users/domain/models/user
 import { logger } from "@/api/shared/infrastructure/config/logger";
 import { UserNotFoundException } from "../../exceptions/user-not-found.exception";
 import { ActiveState } from "@/api/shared/domain/enums/active-state";
+import { UUID } from "@/api/shared/domain/models/uuid";
 
 interface FindUserByUuidWithRolesPermissionsAndTeamsUseCaseDependencies {
 	userRepository?: UserRepository;
@@ -24,7 +25,7 @@ export class FindUserByUuidWithRolesPermissionsAndTeamsUseCase {
 	 * @returns A promise that resolves to a UserWithRolesAndPermissions object.
 	 */
 	public async execute(
-		uuid: string,
+		uuid: UUID,
 	): Promise<UserWithRolesPermissionsAndTeams> {
 		logger.info(
 			`Use case FindUserByUuidWithRolesPermissionsAndTeamsUseCase started for uuid: ${uuid}`,

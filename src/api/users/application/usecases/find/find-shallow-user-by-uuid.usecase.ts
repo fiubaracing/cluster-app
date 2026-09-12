@@ -4,6 +4,7 @@ import { ActiveState } from "@/api/shared/domain/enums/active-state";
 import { UserNotFoundException } from "@/api/users/application/exceptions/user-not-found.exception";
 import { logger } from "@/api/shared/infrastructure/config/logger";
 import { UserRepositoryImpl } from "../../../infrastructure/adapters/user.repository-impl";
+import { UUID } from "@/api/shared/domain/models/uuid";
 
 interface FindShallowUserByUuidUseCaseDependencies {
 	userRepository?: UserRepository;
@@ -22,7 +23,7 @@ export class FindShallowUserByUuidUseCase {
 	 * @returns A promise that resolves to the User object if found, or throws a UserNotFoundException if not found.
 	 * @throws UserNotFoundException if no user is found with the provided email address.
 	 */
-	async execute(uuid: string): Promise<User> {
+	async execute(uuid: UUID): Promise<User> {
 		logger.info(
 			`Use case FindShallowUserByUuidUseCase started for uuid: ${uuid}`,
 		);

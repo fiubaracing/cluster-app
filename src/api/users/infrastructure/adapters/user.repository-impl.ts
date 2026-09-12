@@ -13,6 +13,7 @@ import {
 import { UpsertUserDTO } from "../../application/dtos/upsert-user.dto";
 import { UserEntity } from "../entities/user.entity";
 import { logger } from "@/api/shared/infrastructure/config/logger";
+import { UUID } from "@/api/shared/domain/models/uuid";
 
 export class UserRepositoryImpl implements UserRepository {
 	async findShallowByEmailAndState(
@@ -48,7 +49,7 @@ export class UserRepositoryImpl implements UserRepository {
 	}
 
 	async findShallowByUuidAndState(
-		uuid: string,
+		uuid: UUID,
 		state: ActiveStateType,
 	): Promise<User | null> {
 		logger.info(
@@ -61,7 +62,7 @@ export class UserRepositoryImpl implements UserRepository {
 	}
 
 	async findByUuidAndStateWithRolesPermissionsAndTeams(
-		uuid: string,
+		uuid: UUID,
 		state: ActiveStateType,
 	): Promise<UserWithRolesPermissionsAndTeams | null> {
 		logger.info(

@@ -2,10 +2,11 @@ import { Module } from "@/api/roles/domain/models/module.model";
 import { Permission } from "@/api/roles/domain/models/permission.model";
 import { RoleType } from "@/api/roles/domain/models/role.model";
 import { ActiveStateType } from "@/api/shared/domain/enums/active-state";
+import { UUID } from "@/api/shared/domain/models/uuid";
 
 export class UserEntity {
 	id!: number;
-	uuid!: string;
+	uuid!: UUID;
 	email!: string;
 	name!: string;
 	state!: ActiveStateType;
@@ -20,7 +21,7 @@ export class UserEntity {
 export type UserEntityWithRolesPermissionsAndTeams = UserEntity & {
 	roles: Set<RoleType>;
 	permissions: Map<Module, Set<Permission>>;
-    teams: Set<string>;
+	teams: Set<string>;
 };
 
 export type UserEntityWithCreator = Omit<UserEntity, "createdBy"> & {

@@ -5,6 +5,7 @@ import {
 	UserWithRolesPermissionsAndTeams,
 } from "@/api/users/domain/models/user.model";
 import { UpsertUserDTO } from "../../application/dtos/upsert-user.dto";
+import { UUID } from "@/api/shared/domain/models/uuid";
 
 export interface UserRepository {
 	/**
@@ -36,7 +37,7 @@ export interface UserRepository {
 	 * @returns A promise that resolves to the User object if found, or null if not found.
 	 */
 	findShallowByUuidAndState(
-		uuid: string,
+		uuid: UUID,
 		state: ActiveStateType,
 	): Promise<User | null>;
 
@@ -47,7 +48,7 @@ export interface UserRepository {
 	 * @returns A promise that resolves to the User object if found, or null if not found.
 	 */
 	findByUuidAndStateWithRolesPermissionsAndTeams(
-		uuid: string,
+		uuid: UUID,
 		state: ActiveStateType,
 	): Promise<UserWithRolesPermissionsAndTeams | null>;
 
