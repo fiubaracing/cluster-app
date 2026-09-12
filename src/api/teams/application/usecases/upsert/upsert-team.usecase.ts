@@ -51,7 +51,7 @@ export class UpsertTeamUseCase {
 		validateDto.module = ModuleEnum.TEAMS;
 		validateDto.permission = PermissionSuffixEnum.ADD;
 
-		this.validateAccessUseCase.execute(validateDto);
+		await this.validateAccessUseCase.execute(validateDto);
 
 		return await this.teamRepository.create(dto);
 	}
@@ -66,7 +66,7 @@ export class UpsertTeamUseCase {
 		validateDto.ownerUuid =
 			team.createdBy ? team.createdBy.uuid : undefined;
 
-		this.validateAccessUseCase.execute(validateDto);
+		await this.validateAccessUseCase.execute(validateDto);
 
 		return await this.teamRepository.update(dto);
 	}

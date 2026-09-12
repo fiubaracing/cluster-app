@@ -1,3 +1,5 @@
+import { UUID } from "crypto";
+
 export const RoleEnum = {
     ADMIN: "ADMIN",
     MANAGER: "MANAGER",
@@ -6,3 +8,9 @@ export const RoleEnum = {
 } as const;
 
 export type RoleType = keyof typeof RoleEnum;
+
+export class Role {
+    uuid!: UUID;
+    name!: RoleType;
+    description!: string | null;
+}

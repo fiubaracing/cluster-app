@@ -42,6 +42,17 @@ export interface UserRepository {
 	): Promise<User | null>;
 
 	/**
+	 * Finds a shallow user by their UUID and active state, including the creator information.
+	 * @param uuid - The UUID of the user to find.
+	 * @param state - The active state of the user to filter by.
+	 * @returns A promise that resolves to the User object if found, or null if not found.
+	 */
+	findShallowByUuidAndStateWithCreator(
+		uuid: UUID,
+		state: ActiveStateType,
+	): Promise<UserWithCreator | null>;
+
+	/**
 	 * Finds a user by their UUID and active state, including their roles and permissions.
 	 * @param uuid - The UUID of the user to find.
 	 * @param state - The active state of the user to filter by.
@@ -65,4 +76,12 @@ export interface UserRepository {
 	 * @returns A promise that resolves to the updated User object.
 	 */
 	update(dto: UpsertUserDTO): Promise<User>;
+
+	/**
+	 * Replaces the roles of a user with the specified roles.
+	 * @param userUuid - The UUID of the user whose roles are to be replaced.
+	 * @param roleUuids - An array of UUIDs representing the new roles to assign to the user.
+	 * @returns A promise that resolves to the updated User object with roles, permissions, and teams if successful, or null if the user was not found.
+	 */
+	replaceRoles(userUuid: UUID, roleUuids: UUID[]): Promise<UserWithRolesPermissionsAndTeams>;
 }

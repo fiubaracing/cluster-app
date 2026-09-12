@@ -4,16 +4,17 @@ import {
 	ActiveStateType,
 } from "@/api/shared/domain/enums/active-state";
 import { UserDrizzleRepository } from "@/api/users/infrastructure/repositories/user.drizzle.repository";
-import { UserEntityMapper } from "./mappers/user-entity.mapper";
+import { UserEntityMapper } from "@/api/users/infrastructure/adapters/mappers/user-entity.mapper";
 import {
 	User,
 	UserWithCreator,
 	UserWithRolesPermissionsAndTeams,
-} from "../../domain/models/user.model";
-import { UpsertUserDTO } from "../../application/dtos/upsert-user.dto";
-import { UserEntity } from "../entities/user.entity";
+} from "@/api/users/domain/models/user.model";
+import { UpsertUserDTO } from "@/api/users/application/dtos/upsert-user.dto";
+import { UserEntity } from "@/api/users/infrastructure/entities/user.entity";
 import { logger } from "@/api/shared/infrastructure/config/logger";
 import { UUID } from "crypto";
+import { RoleDrizzleRepository } from "@/api/roles/infrastructure/repositories/role.drizzle.repository";
 
 export class UserRepositoryImpl implements UserRepository {
 	async findShallowByEmailAndState(
@@ -58,6 +59,22 @@ export class UserRepositoryImpl implements UserRepository {
 
 		return UserEntityMapper.toDomainShallow(
 			await UserDrizzleRepository.findByUuidAndState(uuid, state),
+		);
+	}
+
+	async findShallowByUuidAndStateWithCreator(
+		uuid: UUID,
+		state: ActiveStateType,
+	): Promise<UserWithCreator | null> {
+		logger.info(
+			`Finding shallow user by uuid: ${uuid} and state: ${state} with creator`,
+		);
+
+		return UserEntityMapper.toDomainShallowWithCreator(
+			await UserDrizzleRepository.findByUuidAndStateWithCreator(
+				uuid,
+				state,
+			),
 		);
 	}
 
@@ -127,5 +144,69 @@ export class UserRepositoryImpl implements UserRepository {
 		return UserEntityMapper.toDomainShallow(
 			await UserDrizzleRepository.update(existingUser),
 		) as User;
+	}
+
+	async replaceRoles(
+		userUuid: UUID,
+		roleUuids: UUID[],
+	): Promise<UserWithRolesPermissionsAndTeams> {
+		logger.info(`Replacing roles for user with UUID: ${userUuid}`);
+
+		const now = new Date();
+		const currentUser = await UserDrizzleRepository.findUserInContext();
+		if (!currentUser) {
+			throw new Error("Current user not found in context");
+		}
+
+		const userEntity =
+			await UserDrizzleRepository.findByUuidAndStateWithAssignedRoles(
+				userUuid,
+				ActiveState.ACTIVE,
+			);
+		if (!userEntity) {
+			throw new Error(`User with UUID ${userUuid} not found`);
+		}
+
+		const roles = await RoleDrizzleRepository.findByUuidIn(roleUuids);
+		if (!roles || roles.length === 0) {
+			throw new Error(
+				`No roles found with the provided UUIDs: ${roleUuids.join(", ")}`,
+			);
+		} else if (roles.length !== roleUuids.length) {
+			const foundRoleUuids = roles.map((role) => role.uuid);
+			const missingRoleUuids = roleUuids.filter(
+				(uuid) => !foundRoleUuids.includes(uuid),
+			);
+			throw new Error(
+				`Some roles not found with the provided UUIDs: ${missingRoleUuids.join(", ")}`,
+			);
+		}
+
+		const toDeleteIds = userEntity.roles
+			.filter((role) => !roleUuids.includes(role.uuid))
+			.map((role) => role.id);
+		const toAddIds = roles
+			.filter(
+				(role) =>
+					!userEntity.roles.some(
+						(existingRole) => existingRole.uuid === role.uuid,
+					),
+			)
+			.map((role) => role.id);
+
+		await UserDrizzleRepository.replaceRolesInTransaction(
+			userEntity.id,
+			toDeleteIds,
+			toAddIds,
+			now,
+			currentUser,
+		);
+
+		return UserEntityMapper.toDomainWithRolesPermissionsAndTeams(
+			await UserDrizzleRepository.findByUuidAndStateWithRolesPermissionsAndTeams(
+				userUuid,
+				ActiveState.ACTIVE,
+			),
+		) as UserWithRolesPermissionsAndTeams;
 	}
 }

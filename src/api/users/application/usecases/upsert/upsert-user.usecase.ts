@@ -56,7 +56,7 @@ export class UpsertUserUseCase {
 		validateDto.module = ModuleEnum.USERS;
 		validateDto.permission = PermissionSuffixEnum.ADD;
 
-		this.validateAccessUseCase.execute(validateDto);
+		await this.validateAccessUseCase.execute(validateDto);
 
 		return await this.userRepository.create(dto);
 	}
@@ -71,7 +71,7 @@ export class UpsertUserUseCase {
 		validateDto.ownerUuid =
 			user.createdBy ? user.createdBy.uuid : undefined;
 
-		this.validateAccessUseCase.execute(validateDto);
+		await this.validateAccessUseCase.execute(validateDto);
 
 		return await this.userRepository.update(dto);
 	}

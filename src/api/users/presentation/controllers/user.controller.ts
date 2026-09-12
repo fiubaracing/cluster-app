@@ -17,21 +17,28 @@ import {
 } from "../dtos/requests/upsert-user.request";
 import { UserMapper } from "../../application/mappers/user.mapper";
 import { UpsertUserDTO } from "../../application/dtos/upsert-user.dto";
+import { ReplaceUserRolesDTO } from "../../application/dtos/replace-user-roles.dto";
+import { ReplaceUserRolesParams, ReplaceUserRolesRequestBody, replaceUserRolesRequestBodySchema } from "../dtos/requests/replace-user-roles.request";
+import { ReplaceUserRolesUseCase } from "../../application/usecases/replace/replace-user-roles.usecase";
 
 interface UserControllerDependencies {
 	findUserInContextUseCase?: FindUserInContextUseCase;
 	upsertUserUseCase: UpsertUserUseCase;
+	replaceUserRolesUseCase: ReplaceUserRolesUseCase;
 }
 
 export default class UserController {
 	private readonly findUserInContextUseCase: FindUserInContextUseCase;
 	private readonly upsertUserUseCase: UpsertUserUseCase;
+	private readonly replaceUserRolesUseCase: ReplaceUserRolesUseCase;
 
 	constructor(deps?: UserControllerDependencies) {
 		this.findUserInContextUseCase =
 			deps?.findUserInContextUseCase ?? new FindUserInContextUseCase();
 		this.upsertUserUseCase =
 			deps?.upsertUserUseCase ?? new UpsertUserUseCase();
+		this.replaceUserRolesUseCase =
+			deps?.replaceUserRolesUseCase ?? new ReplaceUserRolesUseCase();
 	}
 
 	@Endpoint()
@@ -62,6 +69,33 @@ export default class UserController {
 
 		const dto: UpsertUserDTO = UserMapper.toUpsertUserDTO(body);
 		const user = await this.upsertUserUseCase.execute(dto);
+
+		const response = ApiResponse.json(
+			UserResponseMapper.toUserResponse(user),
+			{
+				status: constants.HTTP_STATUS_OK,
+			},
+		);
+
+		return response;
+	}
+
+	@Endpoint({
+		module: ModuleEnum.USERS,
+		permission: PermissionSuffixEnum.EDIT,
+	})
+	async replaceUserRoles(req: ApiRequest, { params }: ReplaceUserRolesParams): Promise<ApiResponse> {
+		const rawBody = await parseJSON(req);
+		const body: ReplaceUserRolesRequestBody = await validator(
+			replaceUserRolesRequestBodySchema,
+			rawBody,
+		);
+
+		const dto: ReplaceUserRolesDTO =
+			UserMapper.toReplaceUserRolesDTO(body);
+		dto.userUuid = params.uuid;
+
+		const user = await this.replaceUserRolesUseCase.execute(dto);
 
 		const response = ApiResponse.json(
 			UserResponseMapper.toUserResponse(user),
