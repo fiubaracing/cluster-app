@@ -13,7 +13,7 @@ import {
 import { UpsertUserDTO } from "../../application/dtos/upsert-user.dto";
 import { UserEntity } from "../entities/user.entity";
 import { logger } from "@/api/shared/infrastructure/config/logger";
-import { UUID } from "@/api/shared/domain/models/uuid";
+import { UUID } from "crypto";
 
 export class UserRepositoryImpl implements UserRepository {
 	async findShallowByEmailAndState(
@@ -87,7 +87,7 @@ export class UserRepositoryImpl implements UserRepository {
 		}
 
 		const entity = new UserEntity();
-		entity.uuid = crypto.randomUUID();
+		entity.uuid = crypto.randomUUID() as UUID;
 		entity.email = dto.email;
 		entity.name = dto.name;
 

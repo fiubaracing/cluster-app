@@ -1,6 +1,6 @@
 import { ApiExceptionArgs } from "@/api/shared/infrastructure/exceptions/api.exception";
 import { NotFoundException } from "@/api/shared/infrastructure/exceptions/not-found.exception";
-import { UUID } from "@/api/shared/domain/models/uuid";
+import { UUID } from "crypto";
 
 export class UserNotFoundException extends NotFoundException {
 	private constructor(

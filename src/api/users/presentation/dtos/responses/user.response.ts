@@ -1,4 +1,4 @@
-import { UUID } from "@/api/shared/domain/models/uuid";
+import { UUID } from "crypto";
 
 export class UserResponse {
 	uuid!: UUID;

@@ -1,6 +1,6 @@
 import { RoleType } from "@/api/roles/domain/models/role.model";
 import { PermissionsResponse } from "@/api/roles/presentation/dtos/responses/permissions.response";
-import { UUID } from "@/api/shared/domain/models/uuid";
+import { UUID } from "crypto";
 
 export class MeResponse {
 	uuid!: UUID;

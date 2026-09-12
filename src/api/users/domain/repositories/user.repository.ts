@@ -5,7 +5,7 @@ import {
 	UserWithRolesPermissionsAndTeams,
 } from "@/api/users/domain/models/user.model";
 import { UpsertUserDTO } from "../../application/dtos/upsert-user.dto";
-import { UUID } from "@/api/shared/domain/models/uuid";
+import { UUID } from "crypto";
 
 export interface UserRepository {
 	/**

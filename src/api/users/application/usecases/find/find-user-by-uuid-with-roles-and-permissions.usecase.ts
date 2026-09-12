@@ -4,7 +4,7 @@ import { UserWithRolesPermissionsAndTeams } from "@/api/users/domain/models/user
 import { logger } from "@/api/shared/infrastructure/config/logger";
 import { UserNotFoundException } from "../../exceptions/user-not-found.exception";
 import { ActiveState } from "@/api/shared/domain/enums/active-state";
-import { UUID } from "@/api/shared/domain/models/uuid";
+import { UUID } from "crypto";
 
 interface FindUserByUuidWithRolesPermissionsAndTeamsUseCaseDependencies {
 	userRepository?: UserRepository;

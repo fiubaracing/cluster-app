@@ -23,7 +23,7 @@ import { RoleType } from "@/api/roles/domain/models/role.model";
 import { Module } from "@/api/roles/domain/models/module.model";
 import { Permission } from "@/api/roles/domain/models/permission.model";
 import context from "@/api/shared/infrastructure/config/store";
-import { UUID } from "@/api/shared/domain/models/uuid";
+import { UUID } from "crypto";
 
 const creator = aliasedTable(usersInCore, "creator");
 

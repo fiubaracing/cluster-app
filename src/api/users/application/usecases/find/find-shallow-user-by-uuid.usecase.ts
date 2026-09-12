@@ -4,7 +4,7 @@ import { ActiveState } from "@/api/shared/domain/enums/active-state";
 import { UserNotFoundException } from "@/api/users/application/exceptions/user-not-found.exception";
 import { logger } from "@/api/shared/infrastructure/config/logger";
 import { UserRepositoryImpl } from "../../../infrastructure/adapters/user.repository-impl";
-import { UUID } from "@/api/shared/domain/models/uuid";
+import { UUID } from "crypto";
 
 interface FindShallowUserByUuidUseCaseDependencies {
 	userRepository?: UserRepository;
