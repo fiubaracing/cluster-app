@@ -1,4 +1,4 @@
-import { Team, TeamWithCreator } from "@/api/teams/domain/models/team";
+import { Team, TeamWithCreator } from "@/api/teams/domain/models/team.model";
 import {
 	TeamEntity,
 	TeamEntityWithCreator,
@@ -16,6 +16,10 @@ export class TeamEntityMapper {
 		team.name = entity.name;
 		team.description = entity.description;
 		return team;
+	}
+
+	static toDomainArray(entities: TeamEntity[]): Team[] {
+		return entities.map((entity) => this.toDomain(entity) as Team);
 	}
 
 	static toDomainWithCreator(

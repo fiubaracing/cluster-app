@@ -1,6 +1,6 @@
 import { db } from "@/api/shared/infrastructure/config/db";
 import { teamsInCore, usersInCore } from "@/db/migrations/schema";
-import { eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import { TeamEntity, TeamEntityWithCreator } from "@/api/teams/infrastructure/entities/team.entity";
 import { UUID } from "crypto";
 
@@ -46,5 +46,13 @@ export class TeamDrizzleRepository {
 			.then((result) => {
 				return result.length === 0 ? null : (result[0] as TeamEntityWithCreator);
 			});
+	}
+
+	static async findByUuidIn(uuids: UUID[]): Promise<TeamEntity[]> {
+		return await db
+			.select()
+			.from(teamsInCore)
+			.where(and(inArray(teamsInCore.uuid, uuids)))
+			.then((result) => result as TeamEntity[]);
 	}
 }

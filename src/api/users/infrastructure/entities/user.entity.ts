@@ -3,6 +3,7 @@ import { Permission } from "@/api/roles/domain/models/permission.model";
 import { RoleType } from "@/api/roles/domain/models/role.model";
 import { RoleEntity } from "@/api/roles/infrastructure/entities/role.entity";
 import { ActiveStateType } from "@/api/shared/domain/enums/active-state";
+import { TeamEntity } from "@/api/teams/infrastructure/entities/team.entity";
 import { UUID } from "crypto";
 
 export class UserEntity {
@@ -31,4 +32,8 @@ export type UserEntityWithCreator = Omit<UserEntity, "createdBy"> & {
 
 export type UserEntityWithRoles = UserEntity & {
 	roles: RoleEntity[];
+};
+
+export type UserEntityWithTeams = UserEntity & {
+	teams: TeamEntity[];
 };

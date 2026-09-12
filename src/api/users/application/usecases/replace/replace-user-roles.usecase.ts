@@ -87,7 +87,7 @@ export class ReplaceUserRolesUseCase {
 	private async validateAccess(user: UserWithCreator): Promise<void> {
 		const validateDto = new ValidateItemAccessDTO();
 		validateDto.module = ModuleEnum.USERS;
-		validateDto.permission = PermissionSuffixEnum.ADD;
+		validateDto.permission = PermissionSuffixEnum.EDIT;
         validateDto.ownerUuid = user.createdBy ? user.createdBy.uuid : undefined;
 
 		await this.validateAccessUseCase.execute(validateDto);

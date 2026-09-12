@@ -1,5 +1,5 @@
-import { TeamRepository } from "@/api/teams/domain/repositories/team-repository";
-import { Team, TeamWithCreator } from "@/api/teams/domain/models/team";
+import { TeamRepository } from "@/api/teams/domain/repositories/team.repository";
+import { Team, TeamWithCreator } from "@/api/teams/domain/models/team.model";
 import { UpsertTeamDTO } from "@/api/teams/application/dtos/upsert-team.dto";
 import { TeamDrizzleRepository } from "@/api/teams/infrastructure/repositories/team.drizzle.repository";
 import { UserDrizzleRepository } from "@/api/users/infrastructure/repositories/user.drizzle.repository";
@@ -63,6 +63,14 @@ export class TeamRepositoryImpl implements TeamRepository {
 
 		return TeamEntityMapper.toDomainWithCreator(
 			await TeamDrizzleRepository.findByNameWithCreator(name),
+		);
+	}
+
+	async findByUuidIn(uuids: UUID[]): Promise<Team[]> {
+		logger.info(`Finding teams by UUIDs: ${uuids.join(", ")}`);
+
+		return TeamEntityMapper.toDomainArray(
+			await TeamDrizzleRepository.findByUuidIn(uuids),
 		);
 	}
 }

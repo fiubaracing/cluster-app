@@ -15,6 +15,7 @@ import { UserEntity } from "@/api/users/infrastructure/entities/user.entity";
 import { logger } from "@/api/shared/infrastructure/config/logger";
 import { UUID } from "crypto";
 import { RoleDrizzleRepository } from "@/api/roles/infrastructure/repositories/role.drizzle.repository";
+import { TeamDrizzleRepository } from "@/api/teams/infrastructure/repositories/team.drizzle.repository";
 
 export class UserRepositoryImpl implements UserRepository {
 	async findShallowByEmailAndState(
@@ -195,6 +196,70 @@ export class UserRepositoryImpl implements UserRepository {
 			.map((role) => role.id);
 
 		await UserDrizzleRepository.replaceRolesInTransaction(
+			userEntity.id,
+			toDeleteIds,
+			toAddIds,
+			now,
+			currentUser,
+		);
+
+		return UserEntityMapper.toDomainWithRolesPermissionsAndTeams(
+			await UserDrizzleRepository.findByUuidAndStateWithRolesPermissionsAndTeams(
+				userUuid,
+				ActiveState.ACTIVE,
+			),
+		) as UserWithRolesPermissionsAndTeams;
+	}
+
+	async replaceTeams(
+		userUuid: UUID,
+		teamUuids: UUID[],
+	): Promise<UserWithRolesPermissionsAndTeams> {
+		logger.info(`Replacing teams for user with UUID: ${userUuid}`);
+
+		const now = new Date();
+		const currentUser = await UserDrizzleRepository.findUserInContext();
+		if (!currentUser) {
+			throw new Error("Current user not found in context");
+		}
+
+		const userEntity =
+			await UserDrizzleRepository.findByUuidAndStateWithAssignedTeams(
+				userUuid,
+				ActiveState.ACTIVE,
+			);
+		if (!userEntity) {
+			throw new Error(`User with UUID ${userUuid} not found`);
+		}
+
+		const teams = await TeamDrizzleRepository.findByUuidIn(teamUuids);
+		if (!teams || teams.length === 0) {
+			throw new Error(
+				`No teams found with the provided UUIDs: ${teamUuids.join(", ")}`,
+			);
+		} else if (teams.length !== teamUuids.length) {
+			const foundTeamUuids = teams.map((team) => team.uuid);
+			const missingTeamUuids = teamUuids.filter(
+				(uuid) => !foundTeamUuids.includes(uuid),
+			);
+			throw new Error(
+				`Some teams not found with the provided UUIDs: ${missingTeamUuids.join(", ")}`,
+			);
+		}
+
+		const toDeleteIds = userEntity.teams
+			.filter((team) => !teamUuids.includes(team.uuid))
+			.map((team) => team.id);
+		const toAddIds = teams
+			.filter(
+				(team) =>
+					!userEntity.teams.some(
+						(existingTeam) => existingTeam.uuid === team.uuid,
+					),
+			)
+			.map((team) => team.id);
+
+		await UserDrizzleRepository.replaceTeamsInTransaction(
 			userEntity.id,
 			toDeleteIds,
 			toAddIds,

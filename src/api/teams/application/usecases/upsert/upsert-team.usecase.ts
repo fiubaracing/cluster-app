@@ -1,5 +1,5 @@
-import { Team, TeamWithCreator } from "@/api/teams/domain/models/team";
-import { TeamRepository } from "@/api/teams/domain/repositories/team-repository";
+import { Team, TeamWithCreator } from "@/api/teams/domain/models/team.model";
+import { TeamRepository } from "@/api/teams/domain/repositories/team.repository";
 import { logger } from "@/api/shared/infrastructure/config/logger";
 import { ValidateAccessUseCase } from "@/api/auth/application/usecases/validate/validate-access.usecase";
 import { ValidateItemAccessDTO } from "@/api/auth/application/dtos/validate-access.dto";

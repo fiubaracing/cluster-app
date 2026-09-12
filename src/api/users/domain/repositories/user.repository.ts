@@ -84,4 +84,12 @@ export interface UserRepository {
 	 * @returns A promise that resolves to the updated User object with roles, permissions, and teams if successful, or null if the user was not found.
 	 */
 	replaceRoles(userUuid: UUID, roleUuids: UUID[]): Promise<UserWithRolesPermissionsAndTeams>;
+
+	/**
+	 * Replaces the teams of a user with the specified teams.
+	 * @param userUuid - The UUID of the user whose teams are to be replaced.
+	 * @param teamUuids - An array of UUIDs representing the new teams to assign to the user.
+	 * @returns A promise that resolves to the updated User object with roles, permissions, and teams if successful, or null if the user was not found.
+	 */
+	replaceTeams(userUuid: UUID, teamUuids: UUID[]): Promise<UserWithRolesPermissionsAndTeams>;
 }

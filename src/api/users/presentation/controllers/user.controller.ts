@@ -18,19 +18,32 @@ import {
 import { UserMapper } from "../../application/mappers/user.mapper";
 import { UpsertUserDTO } from "../../application/dtos/upsert-user.dto";
 import { ReplaceUserRolesDTO } from "../../application/dtos/replace-user-roles.dto";
-import { ReplaceUserRolesParams, ReplaceUserRolesRequestBody, replaceUserRolesRequestBodySchema } from "../dtos/requests/replace-user-roles.request";
+import {
+	ReplaceUserRolesParams,
+	ReplaceUserRolesRequestBody,
+	replaceUserRolesRequestBodySchema,
+} from "../dtos/requests/replace-user-roles.request";
 import { ReplaceUserRolesUseCase } from "../../application/usecases/replace/replace-user-roles.usecase";
+import {
+	ReplaceUserTeamsParams,
+	ReplaceUserTeamsRequestBody,
+	replaceUserTeamsRequestBodySchema,
+} from "../dtos/requests/replace-user-teams.request";
+import { ReplaceUserTeamsDTO } from "../../application/dtos/replace-user-teams.dto";
+import { ReplaceUserTeamsUseCase } from "../../application/usecases/replace/replace-user-teams.usecase";
 
 interface UserControllerDependencies {
 	findUserInContextUseCase?: FindUserInContextUseCase;
 	upsertUserUseCase: UpsertUserUseCase;
 	replaceUserRolesUseCase: ReplaceUserRolesUseCase;
+	replaceUserTeamsUseCase: ReplaceUserTeamsUseCase;
 }
 
 export default class UserController {
 	private readonly findUserInContextUseCase: FindUserInContextUseCase;
 	private readonly upsertUserUseCase: UpsertUserUseCase;
 	private readonly replaceUserRolesUseCase: ReplaceUserRolesUseCase;
+	private readonly replaceUserTeamsUseCase: ReplaceUserTeamsUseCase;
 
 	constructor(deps?: UserControllerDependencies) {
 		this.findUserInContextUseCase =
@@ -39,6 +52,8 @@ export default class UserController {
 			deps?.upsertUserUseCase ?? new UpsertUserUseCase();
 		this.replaceUserRolesUseCase =
 			deps?.replaceUserRolesUseCase ?? new ReplaceUserRolesUseCase();
+		this.replaceUserTeamsUseCase =
+			deps?.replaceUserTeamsUseCase ?? new ReplaceUserTeamsUseCase();
 	}
 
 	@Endpoint()
@@ -84,18 +99,49 @@ export default class UserController {
 		module: ModuleEnum.USERS,
 		permission: PermissionSuffixEnum.EDIT,
 	})
-	async replaceUserRoles(req: ApiRequest, { params }: ReplaceUserRolesParams): Promise<ApiResponse> {
+	async replaceUserRoles(
+		req: ApiRequest,
+		{ params }: ReplaceUserRolesParams,
+	): Promise<ApiResponse> {
 		const rawBody = await parseJSON(req);
 		const body: ReplaceUserRolesRequestBody = await validator(
 			replaceUserRolesRequestBodySchema,
 			rawBody,
 		);
 
-		const dto: ReplaceUserRolesDTO =
-			UserMapper.toReplaceUserRolesDTO(body);
+		const dto: ReplaceUserRolesDTO = UserMapper.toReplaceUserRolesDTO(body);
 		dto.userUuid = params.uuid;
 
 		const user = await this.replaceUserRolesUseCase.execute(dto);
+
+		const response = ApiResponse.json(
+			UserResponseMapper.toUserResponse(user),
+			{
+				status: constants.HTTP_STATUS_OK,
+			},
+		);
+
+		return response;
+	}
+
+	@Endpoint({
+		module: ModuleEnum.USERS,
+		permission: PermissionSuffixEnum.EDIT,
+	})
+	async replaceUserTeams(
+		req: ApiRequest,
+		{ params }: ReplaceUserTeamsParams,
+	): Promise<ApiResponse> {
+		const rawBody = await parseJSON(req);
+		const body: ReplaceUserTeamsRequestBody = await validator(
+			replaceUserTeamsRequestBodySchema,
+			rawBody,
+		);
+
+		const dto: ReplaceUserTeamsDTO = UserMapper.toReplaceUserTeamsDTO(body);
+		dto.userUuid = params.uuid;
+
+		const user = await this.replaceUserTeamsUseCase.execute(dto);
 
 		const response = ApiResponse.json(
 			UserResponseMapper.toUserResponse(user),

@@ -14,6 +14,7 @@ import {
 	UserEntityWithCreator,
 	UserEntityWithRoles,
 	UserEntityWithRolesPermissionsAndTeams,
+	UserEntityWithTeams,
 } from "@/api/users/infrastructure/entities/user.entity";
 import {
 	ActiveState,
@@ -26,6 +27,7 @@ import { Permission } from "@/api/roles/domain/models/permission.model";
 import context from "@/api/shared/infrastructure/config/store";
 import { UUID } from "crypto";
 import { RoleEntity } from "@/api/roles/infrastructure/entities/role.entity";
+import { TeamEntity } from "@/api/teams/infrastructure/entities/team.entity";
 
 const creator = aliasedTable(usersInCore, "creator");
 
@@ -136,7 +138,38 @@ export class UserDrizzleRepository {
 			...user,
 			roles,
 		};
+	}
 
+	static async findByUuidAndStateWithAssignedTeams(
+		uuid: UUID,
+		state: ActiveStateType,
+	): Promise<UserEntityWithTeams | null> {
+		const rows = await db
+			.select({
+				user: usersInCore,
+				team: teamsInCore,
+			})
+			.from(usersInCore)
+			.leftJoin(
+				userTeamsInCore,
+				eq(usersInCore.id, userTeamsInCore.userId),
+			)
+			.leftJoin(teamsInCore, eq(userTeamsInCore.teamId, teamsInCore.id))
+			.where(
+				and(eq(usersInCore.uuid, uuid), eq(usersInCore.state, state)),
+			);
+
+		if (rows.length === 0) {
+			return null;
+		}
+
+		const user = rows[0].user as UserEntity;
+		const teams = rows.map((row) => row.team as TeamEntity).filter((team) => team !== null);
+
+		return {
+			...user,
+			teams,
+		};
 	}
 
 	static async findByUuidAndStateWithRolesPermissionsAndTeams(
@@ -299,20 +332,81 @@ export class UserDrizzleRepository {
 		);
 	}
 
-	static replaceRolesInTransaction(
+	static async replaceRolesInTransaction(
 		userId: number,
 		roleIdsToAdd: number[],
 		roleIdsToRemove: number[],
 		now: Date,
 		currentUser: UserEntity,
 	): Promise<void> {
-		return db.transaction(async (trx) => {
+		return await db.transaction(async (trx) => {
 			if (roleIdsToRemove.length > 0) {
 				await this.unassignRolesIn(userId, roleIdsToRemove, now, currentUser);
 			}
 
 			if (roleIdsToAdd.length > 0) {
 				await this.assignRolesIn(userId, roleIdsToAdd, now, currentUser);
+			}
+		});
+	}
+
+	static async unassignTeamsIn(
+		userId: number,
+		teamIds: number[],
+		now: Date,
+		currentUser: UserEntity,
+	): Promise<void> {
+		await db
+			.update(userTeamsInCore)
+			.set({
+				state: ActiveState.INACTIVE,
+				updatedAt: now,
+				updatedBy: currentUser.id,
+				deactivatedAt: now,
+				deactivatedBy: currentUser.id,
+			})
+			.where(
+				and(
+					eq(userTeamsInCore.userId, userId),
+					eq(userTeamsInCore.state, ActiveState.ACTIVE),
+					inArray(userTeamsInCore.teamId, teamIds),
+				),
+			);
+	}
+
+	static async assignTeamsIn(
+		userId: number,
+		teamIds: number[],
+		now: Date,
+		currentUser: UserEntity,
+	): Promise<void> {
+		await db.insert(userTeamsInCore).values(
+			teamIds.map((teamId) => ({
+				userId,
+				teamId,
+				state: ActiveState.ACTIVE,
+				createdAt: now,
+				createdBy: currentUser.id,
+				updatedAt: now,
+				updatedBy: currentUser.id,
+			})),
+		);
+	}
+
+	static async replaceTeamsInTransaction(
+		userId: number,
+		teamIdsToAdd: number[],
+		teamIdsToRemove: number[],
+		now: Date,
+		currentUser: UserEntity,
+	): Promise<void> {
+		return await db.transaction(async (trx) => {
+			if (teamIdsToRemove.length > 0) {
+				await this.unassignTeamsIn(userId, teamIdsToRemove, now, currentUser);
+			}
+
+			if (teamIdsToAdd.length > 0) {
+				await this.assignTeamsIn(userId, teamIdsToAdd, now, currentUser);
 			}
 		});
 	}
