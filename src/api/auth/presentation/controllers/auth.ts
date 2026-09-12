@@ -70,7 +70,7 @@ export default class AuthController {
 	async refresh(req: ApiRequest) {
 		const refreshToken = req.cookies.get("refreshToken")?.value;
 		if (!refreshToken) {
-			return BlankTokenException.fromRefreshToken();
+			throw BlankTokenException.fromRefreshToken();
 		}
 
 		const auth: Auth = await this.refreshTokenUseCase.execute(refreshToken);
