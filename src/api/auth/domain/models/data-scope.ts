@@ -1,5 +1,7 @@
+import type { UUID } from "crypto";
+
 export class DataScope {
-	isGlobal!: boolean;
-	ownerUuid!: string | null;
-	teamUuids!: string[] | null;
+  isGlobal!: boolean;
+  ownerUuid!: UUID | null;
+  teamUuids!: UUID[] | null;
 }

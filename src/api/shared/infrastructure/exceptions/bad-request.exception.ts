@@ -1,5 +1,5 @@
-import { ApiException, ApiExceptionArgs } from "./api.exception";
 import { constants } from "http2";
+import { ApiException, type ApiExceptionArgs } from "./api.exception";
 
 export class BadRequestException extends ApiException {
   constructor(

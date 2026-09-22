@@ -1,3 +1,3 @@
 export class LoginDTO {
-	googleAccessToken!: string;
+  googleAccessToken!: string;
 }

@@ -1,8 +1,8 @@
-import { UUID } from "crypto";
+import type { UUID } from "crypto";
 
 export class RoleEntity {
-    id!: number;
-    uuid!: UUID;
-    name!: string;
-    description!: string | null;
+  id!: number;
+  uuid!: UUID;
+  name!: string;
+  description!: string | null;
 }

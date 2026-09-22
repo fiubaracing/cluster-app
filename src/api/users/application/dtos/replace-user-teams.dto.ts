@@ -1,6 +1,6 @@
-import { UUID } from "crypto";
+import type { UUID } from "crypto";
 
 export class ReplaceUserTeamsDTO {
-    userUuid!: UUID;
-    teamUuids!: UUID[];
+  userUuid!: UUID;
+  teamUuids!: UUID[];
 }

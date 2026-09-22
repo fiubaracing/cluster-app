@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { Outfit } from "next/font/google";
 import GoogleProvider from "@/app/context/GoogleProvider";
-import { Outfit } from 'next/font/google';
 
 // Configure the font
-const outfit = Outfit({ 
-  subsets: ['latin'],
-  variable: '--font-sans', // This matches your Tailwind config!
+const outfit = Outfit({
+  subsets: ["latin"],
+  variable: "--font-sans", // This matches your Tailwind config!
 });
 
 export const metadata: Metadata = {
@@ -20,14 +20,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${outfit.variable} h-full antialiased`}
-    >
+    <html lang="en" className={`${outfit.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
-        <GoogleProvider>
-          {children}
-        </GoogleProvider>
+        <GoogleProvider>{children}</GoogleProvider>
       </body>
     </html>
   );

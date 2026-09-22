@@ -2,23 +2,26 @@ import { AsyncLocalStorage } from "node:async_hooks";
 import { UserWithRolesPermissionsAndTeams } from "@/api/users/domain/models/user.model";
 
 export type Context = {
-	traceId: string;
-	user: UserWithRolesPermissionsAndTeams;
+  traceId: string;
+  user: UserWithRolesPermissionsAndTeams;
 };
 
 const context = new AsyncLocalStorage<Context>();
 
 export default {
-	get store() {
-		return (
-			context.getStore() ?? {
-				traceId: crypto.randomUUID(),
-				user: new UserWithRolesPermissionsAndTeams(),
-			}
-		);
-	},
+  get store() {
+    return (
+      context.getStore() ?? {
+        traceId: crypto.randomUUID(),
+        user: new UserWithRolesPermissionsAndTeams(),
+      }
+    );
+  },
 
-	run(callback: (ctx: Context, ...args: any[]) => Promise<any>, _ctx?: Context) {
-		return context.run(_ctx ?? this.store, () => callback(this.store));
-	},
+  run(
+    callback: (ctx: Context, ...args: any[]) => Promise<any>,
+    _ctx?: Context,
+  ) {
+    return context.run(_ctx ?? this.store, () => callback(this.store));
+  },
 };

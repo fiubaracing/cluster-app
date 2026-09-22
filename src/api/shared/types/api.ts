@@ -1,5 +1,5 @@
-import { AccessTokenPayload } from "@/api/auth/domain/models/access-token-payload";
 import { NextRequest, NextResponse } from "next/server";
+import type { AccessTokenPayload } from "@/api/auth/domain/models/access-token-payload";
 
 export type ApiHandler = (
   req: ApiRequest,

@@ -1,277 +1,276 @@
-import { UserRepository } from "@/api/users/domain/repositories/user.repository";
-import {
-	ActiveState,
-	ActiveStateType,
-} from "@/api/shared/domain/enums/active-state";
-import { UserDrizzleRepository } from "@/api/users/infrastructure/repositories/user.drizzle.repository";
-import { UserEntityMapper } from "@/api/users/infrastructure/adapters/mappers/user-entity.mapper";
-import {
-	User,
-	UserWithCreator,
-	UserWithRolesPermissionsAndTeams,
-} from "@/api/users/domain/models/user.model";
-import { UpsertUserDTO } from "@/api/users/application/dtos/upsert-user.dto";
-import { UserEntity } from "@/api/users/infrastructure/entities/user.entity";
-import { logger } from "@/api/shared/infrastructure/config/logger";
-import { UUID } from "crypto";
+import type { UUID } from "crypto";
 import { RoleDrizzleRepository } from "@/api/roles/infrastructure/repositories/role.drizzle.repository";
+import {
+  ActiveState,
+  type ActiveStateType,
+} from "@/api/shared/domain/enums/active-state";
+import type { Paginated } from "@/api/shared/domain/models/paginated.model";
+import { logger } from "@/api/shared/infrastructure/config/logger";
 import { TeamDrizzleRepository } from "@/api/teams/infrastructure/repositories/team.drizzle.repository";
+import type { UpsertUserDTO } from "@/api/users/application/dtos/upsert-user.dto";
+import type {
+  User,
+  UserWithCreator,
+  UserWithRolesPermissionsAndTeams,
+} from "@/api/users/domain/models/user.model";
+import type { UserRepository } from "@/api/users/domain/repositories/user.repository";
+import { UserEntityMapper } from "@/api/users/infrastructure/adapters/mappers/user-entity.mapper";
+import { UserEntity } from "@/api/users/infrastructure/entities/user.entity";
+import { UserDrizzleRepository } from "@/api/users/infrastructure/repositories/user.drizzle.repository";
+import type { FindAllUsersDTO } from "../../application/dtos/find-all-users.dto";
 
 export class UserRepositoryImpl implements UserRepository {
-	async findShallowByEmailAndState(
-		email: string,
-		state: ActiveStateType,
-	): Promise<User | null> {
-		logger.info(
-			`Finding shallow user by email: ${email} and state: ${state}`,
-		);
+  async findShallowByEmailAndState(
+    email: string,
+    state: ActiveStateType,
+  ): Promise<User | null> {
+    logger.info(`Finding shallow user by email: ${email} and state: ${state}`);
 
-		return UserEntityMapper.toDomainShallow(
-			await UserDrizzleRepository.findShallowByEmailAndState(
-				email,
-				state,
-			),
-		);
-	}
+    return UserEntityMapper.toDomainShallow(
+      await UserDrizzleRepository.findShallowByEmailAndState(email, state),
+    );
+  }
 
-	async findShallowByEmailAndStateWithCreator(
-		email: string,
-		state: ActiveStateType,
-	): Promise<UserWithCreator | null> {
-		logger.info(
-			`Finding shallow user by email: ${email} and state: ${state} with creator`,
-		);
+  async findShallowByEmailAndStateWithCreator(
+    email: string,
+    state: ActiveStateType,
+  ): Promise<UserWithCreator | null> {
+    logger.info(
+      `Finding shallow user by email: ${email} and state: ${state} with creator`,
+    );
 
-		return UserEntityMapper.toDomainShallowWithCreator(
-			await UserDrizzleRepository.findShallowByEmailAndStateWithCreator(
-				email,
-				state,
-			),
-		);
-	}
+    return UserEntityMapper.toDomainShallowWithCreator(
+      await UserDrizzleRepository.findShallowByEmailAndStateWithCreator(
+        email,
+        state,
+      ),
+    );
+  }
 
-	async findShallowByUuidAndState(
-		uuid: UUID,
-		state: ActiveStateType,
-	): Promise<User | null> {
-		logger.info(
-			`Finding shallow user by uuid: ${uuid} and state: ${state}`,
-		);
+  async findShallowByUuidAndState(
+    uuid: UUID,
+    state: ActiveStateType,
+  ): Promise<User | null> {
+    logger.info(`Finding shallow user by uuid: ${uuid} and state: ${state}`);
 
-		return UserEntityMapper.toDomainShallow(
-			await UserDrizzleRepository.findByUuidAndState(uuid, state),
-		);
-	}
+    return UserEntityMapper.toDomainShallow(
+      await UserDrizzleRepository.findByUuidAndState(uuid, state),
+    );
+  }
 
-	async findShallowByUuidAndStateWithCreator(
-		uuid: UUID,
-		state: ActiveStateType,
-	): Promise<UserWithCreator | null> {
-		logger.info(
-			`Finding shallow user by uuid: ${uuid} and state: ${state} with creator`,
-		);
+  async findShallowByUuidAndStateWithCreator(
+    uuid: UUID,
+    state: ActiveStateType,
+  ): Promise<UserWithCreator | null> {
+    logger.info(
+      `Finding shallow user by uuid: ${uuid} and state: ${state} with creator`,
+    );
 
-		return UserEntityMapper.toDomainShallowWithCreator(
-			await UserDrizzleRepository.findByUuidAndStateWithCreator(
-				uuid,
-				state,
-			),
-		);
-	}
+    return UserEntityMapper.toDomainShallowWithCreator(
+      await UserDrizzleRepository.findByUuidAndStateWithCreator(uuid, state),
+    );
+  }
 
-	async findByUuidAndStateWithRolesPermissionsAndTeams(
-		uuid: UUID,
-		state: ActiveStateType,
-	): Promise<UserWithRolesPermissionsAndTeams | null> {
-		logger.info(
-			`Finding user by uuid: ${uuid} and state: ${state} with roles, permissions, and teams`,
-		);
+  async findByUuidAndStateWithRolesPermissionsAndTeams(
+    uuid: UUID,
+    state: ActiveStateType,
+  ): Promise<UserWithRolesPermissionsAndTeams | null> {
+    logger.info(
+      `Finding user by uuid: ${uuid} and state: ${state} with roles, permissions, and teams`,
+    );
 
-		return UserEntityMapper.toDomainWithRolesPermissionsAndTeams(
-			await UserDrizzleRepository.findByUuidAndStateWithRolesPermissionsAndTeams(
-				uuid,
-				state,
-			),
-		);
-	}
+    return UserEntityMapper.toDomainWithRolesPermissionsAndTeams(
+      await UserDrizzleRepository.findByUuidAndStateWithRolesPermissionsAndTeams(
+        uuid,
+        state,
+      ),
+    );
+  }
 
-	async create(dto: UpsertUserDTO): Promise<User> {
-		logger.info(`Creating user: ${dto.email}`);
+  async create(dto: UpsertUserDTO): Promise<User> {
+    logger.info(`Creating user: ${dto.email}`);
 
-		const now = new Date();
-		const currentUser = await UserDrizzleRepository.findUserInContext();
-		if (!currentUser) {
-			throw new Error("Current user not found in context");
-		}
+    const now = new Date();
+    const currentUser = await UserDrizzleRepository.findUserInContext();
+    if (!currentUser) {
+      throw new Error("Current user not found in context");
+    }
 
-		const entity = new UserEntity();
-		entity.uuid = crypto.randomUUID() as UUID;
-		entity.email = dto.email;
-		entity.name = dto.name;
+    const entity = new UserEntity();
+    entity.uuid = crypto.randomUUID() as UUID;
+    entity.email = dto.email;
+    entity.name = dto.name;
 
-		entity.state = ActiveState.ACTIVE;
-		entity.createdAt = now;
-		entity.createdBy = currentUser.id;
-		entity.updatedAt = now;
-		entity.updatedBy = currentUser.id;
+    entity.state = ActiveState.ACTIVE;
+    entity.createdAt = now;
+    entity.createdBy = currentUser.id;
+    entity.updatedAt = now;
+    entity.updatedBy = currentUser.id;
 
-		return UserEntityMapper.toDomainShallow(
-			await UserDrizzleRepository.create(entity),
-		) as User;
-	}
+    return UserEntityMapper.toDomainShallow(
+      await UserDrizzleRepository.create(entity),
+    ) as User;
+  }
 
-	async update(dto: UpsertUserDTO): Promise<User> {
-		logger.info(`Updating user: ${dto.email}`);
+  async update(dto: UpsertUserDTO): Promise<User> {
+    logger.info(`Updating user: ${dto.email}`);
 
-		const now = new Date();
-		const currentUser = await UserDrizzleRepository.findUserInContext();
-		if (!currentUser) {
-			throw new Error("Current user not found in context");
-		}
+    const now = new Date();
+    const currentUser = await UserDrizzleRepository.findUserInContext();
+    if (!currentUser) {
+      throw new Error("Current user not found in context");
+    }
 
-		const existingUser =
-			await UserDrizzleRepository.findShallowByEmailAndState(
-				dto.email,
-				ActiveState.ACTIVE,
-			);
-		if (!existingUser) {
-			throw new Error(`User with email ${dto.email} not found`);
-		}
+    const existingUser = await UserDrizzleRepository.findShallowByEmailAndState(
+      dto.email,
+      ActiveState.ACTIVE,
+    );
+    if (!existingUser) {
+      throw new Error(`User with email ${dto.email} not found`);
+    }
 
-		existingUser.name = dto.name;
-		existingUser.updatedAt = now;
-		existingUser.updatedBy = currentUser.id;
+    existingUser.name = dto.name;
+    existingUser.updatedAt = now;
+    existingUser.updatedBy = currentUser.id;
 
-		return UserEntityMapper.toDomainShallow(
-			await UserDrizzleRepository.update(existingUser),
-		) as User;
-	}
+    return UserEntityMapper.toDomainShallow(
+      await UserDrizzleRepository.update(existingUser),
+    ) as User;
+  }
 
-	async replaceRoles(
-		userUuid: UUID,
-		roleUuids: UUID[],
-	): Promise<UserWithRolesPermissionsAndTeams> {
-		logger.info(`Replacing roles for user with UUID: ${userUuid}`);
+  async replaceRoles(
+    userUuid: UUID,
+    roleUuids: UUID[],
+  ): Promise<UserWithRolesPermissionsAndTeams> {
+    logger.info(`Replacing roles for user with UUID: ${userUuid}`);
 
-		const now = new Date();
-		const currentUser = await UserDrizzleRepository.findUserInContext();
-		if (!currentUser) {
-			throw new Error("Current user not found in context");
-		}
+    const now = new Date();
+    const currentUser = await UserDrizzleRepository.findUserInContext();
+    if (!currentUser) {
+      throw new Error("Current user not found in context");
+    }
 
-		const userEntity =
-			await UserDrizzleRepository.findByUuidAndStateWithAssignedRoles(
-				userUuid,
-				ActiveState.ACTIVE,
-			);
-		if (!userEntity) {
-			throw new Error(`User with UUID ${userUuid} not found`);
-		}
+    const userEntity =
+      await UserDrizzleRepository.findByUuidAndStateWithAssignedRoles(
+        userUuid,
+        ActiveState.ACTIVE,
+      );
+    if (!userEntity) {
+      throw new Error(`User with UUID ${userUuid} not found`);
+    }
 
-		const roles = await RoleDrizzleRepository.findByUuidIn(roleUuids);
-		if (!roles || roles.length === 0) {
-			throw new Error(
-				`No roles found with the provided UUIDs: ${roleUuids.join(", ")}`,
-			);
-		} else if (roles.length !== roleUuids.length) {
-			const foundRoleUuids = roles.map((role) => role.uuid);
-			const missingRoleUuids = roleUuids.filter(
-				(uuid) => !foundRoleUuids.includes(uuid),
-			);
-			throw new Error(
-				`Some roles not found with the provided UUIDs: ${missingRoleUuids.join(", ")}`,
-			);
-		}
+    const roles = await RoleDrizzleRepository.findByUuidIn(roleUuids);
+    if (!roles || roles.length === 0) {
+      throw new Error(
+        `No roles found with the provided UUIDs: ${roleUuids.join(", ")}`,
+      );
+    } else if (roles.length !== roleUuids.length) {
+      const foundRoleUuids = roles.map((role) => role.uuid);
+      const missingRoleUuids = roleUuids.filter(
+        (uuid) => !foundRoleUuids.includes(uuid),
+      );
+      throw new Error(
+        `Some roles not found with the provided UUIDs: ${missingRoleUuids.join(", ")}`,
+      );
+    }
 
-		const toDeleteIds = userEntity.roles
-			.filter((role) => !roleUuids.includes(role.uuid))
-			.map((role) => role.id);
-		const toAddIds = roles
-			.filter(
-				(role) =>
-					!userEntity.roles.some(
-						(existingRole) => existingRole.uuid === role.uuid,
-					),
-			)
-			.map((role) => role.id);
+    const toDeleteIds = userEntity.roles
+      .filter((role) => !roleUuids.includes(role.uuid))
+      .map((role) => role.id);
+    const toAddIds = roles
+      .filter(
+        (role) =>
+          !userEntity.roles.some(
+            (existingRole) => existingRole.uuid === role.uuid,
+          ),
+      )
+      .map((role) => role.id);
 
-		await UserDrizzleRepository.replaceRolesInTransaction(
-			userEntity.id,
-			toDeleteIds,
-			toAddIds,
-			now,
-			currentUser,
-		);
+    await UserDrizzleRepository.replaceRolesInTransaction(
+      userEntity.id,
+      toDeleteIds,
+      toAddIds,
+      now,
+      currentUser,
+    );
 
-		return UserEntityMapper.toDomainWithRolesPermissionsAndTeams(
-			await UserDrizzleRepository.findByUuidAndStateWithRolesPermissionsAndTeams(
-				userUuid,
-				ActiveState.ACTIVE,
-			),
-		) as UserWithRolesPermissionsAndTeams;
-	}
+    return UserEntityMapper.toDomainWithRolesPermissionsAndTeams(
+      await UserDrizzleRepository.findByUuidAndStateWithRolesPermissionsAndTeams(
+        userUuid,
+        ActiveState.ACTIVE,
+      ),
+    ) as UserWithRolesPermissionsAndTeams;
+  }
 
-	async replaceTeams(
-		userUuid: UUID,
-		teamUuids: UUID[],
-	): Promise<UserWithRolesPermissionsAndTeams> {
-		logger.info(`Replacing teams for user with UUID: ${userUuid}`);
+  async replaceTeams(
+    userUuid: UUID,
+    teamUuids: UUID[],
+  ): Promise<UserWithRolesPermissionsAndTeams> {
+    logger.info(`Replacing teams for user with UUID: ${userUuid}`);
 
-		const now = new Date();
-		const currentUser = await UserDrizzleRepository.findUserInContext();
-		if (!currentUser) {
-			throw new Error("Current user not found in context");
-		}
+    const now = new Date();
+    const currentUser = await UserDrizzleRepository.findUserInContext();
+    if (!currentUser) {
+      throw new Error("Current user not found in context");
+    }
 
-		const userEntity =
-			await UserDrizzleRepository.findByUuidAndStateWithAssignedTeams(
-				userUuid,
-				ActiveState.ACTIVE,
-			);
-		if (!userEntity) {
-			throw new Error(`User with UUID ${userUuid} not found`);
-		}
+    const userEntity =
+      await UserDrizzleRepository.findByUuidAndStateWithAssignedTeams(
+        userUuid,
+        ActiveState.ACTIVE,
+      );
+    if (!userEntity) {
+      throw new Error(`User with UUID ${userUuid} not found`);
+    }
 
-		const teams = await TeamDrizzleRepository.findByUuidIn(teamUuids);
-		if (!teams || teams.length === 0) {
-			throw new Error(
-				`No teams found with the provided UUIDs: ${teamUuids.join(", ")}`,
-			);
-		} else if (teams.length !== teamUuids.length) {
-			const foundTeamUuids = teams.map((team) => team.uuid);
-			const missingTeamUuids = teamUuids.filter(
-				(uuid) => !foundTeamUuids.includes(uuid),
-			);
-			throw new Error(
-				`Some teams not found with the provided UUIDs: ${missingTeamUuids.join(", ")}`,
-			);
-		}
+    const teams = await TeamDrizzleRepository.findByUuidIn(teamUuids);
+    if (!teams || teams.length === 0) {
+      throw new Error(
+        `No teams found with the provided UUIDs: ${teamUuids.join(", ")}`,
+      );
+    } else if (teams.length !== teamUuids.length) {
+      const foundTeamUuids = teams.map((team) => team.uuid);
+      const missingTeamUuids = teamUuids.filter(
+        (uuid) => !foundTeamUuids.includes(uuid),
+      );
+      throw new Error(
+        `Some teams not found with the provided UUIDs: ${missingTeamUuids.join(", ")}`,
+      );
+    }
 
-		const toDeleteIds = userEntity.teams
-			.filter((team) => !teamUuids.includes(team.uuid))
-			.map((team) => team.id);
-		const toAddIds = teams
-			.filter(
-				(team) =>
-					!userEntity.teams.some(
-						(existingTeam) => existingTeam.uuid === team.uuid,
-					),
-			)
-			.map((team) => team.id);
+    const toDeleteIds = userEntity.teams
+      .filter((team) => !teamUuids.includes(team.uuid))
+      .map((team) => team.id);
+    const toAddIds = teams
+      .filter(
+        (team) =>
+          !userEntity.teams.some(
+            (existingTeam) => existingTeam.uuid === team.uuid,
+          ),
+      )
+      .map((team) => team.id);
 
-		await UserDrizzleRepository.replaceTeamsInTransaction(
-			userEntity.id,
-			toDeleteIds,
-			toAddIds,
-			now,
-			currentUser,
-		);
+    await UserDrizzleRepository.replaceTeamsInTransaction(
+      userEntity.id,
+      toDeleteIds,
+      toAddIds,
+      now,
+      currentUser,
+    );
 
-		return UserEntityMapper.toDomainWithRolesPermissionsAndTeams(
-			await UserDrizzleRepository.findByUuidAndStateWithRolesPermissionsAndTeams(
-				userUuid,
-				ActiveState.ACTIVE,
-			),
-		) as UserWithRolesPermissionsAndTeams;
-	}
+    return UserEntityMapper.toDomainWithRolesPermissionsAndTeams(
+      await UserDrizzleRepository.findByUuidAndStateWithRolesPermissionsAndTeams(
+        userUuid,
+        ActiveState.ACTIVE,
+      ),
+    ) as UserWithRolesPermissionsAndTeams;
+  }
+
+  async findAll(dto: FindAllUsersDTO): Promise<Paginated<User>> {
+    logger.info(`Finding all users with search: ${dto.search}`);
+
+    return UserEntityMapper.toDomainShallowPaginated(
+      await UserDrizzleRepository.findAllUsers(dto),
+    );
+  }
 }

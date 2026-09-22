@@ -11,7 +11,7 @@ export class ApiException extends Error {
     detail: string,
     status: number,
     errorCode?: string,
-    errorArgs?: ApiExceptionArgs
+    errorArgs?: ApiExceptionArgs,
   ) {
     super(detail);
     this.title = title;

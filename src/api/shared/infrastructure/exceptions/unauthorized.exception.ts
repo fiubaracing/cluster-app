@@ -1,5 +1,5 @@
 import { constants } from "http2";
-import { ApiException, ApiExceptionArgs } from "./api.exception";
+import { ApiException, type ApiExceptionArgs } from "./api.exception";
 
 export class UnauthorizedException extends ApiException {
   constructor(

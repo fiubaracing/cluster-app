@@ -1,7 +1,7 @@
-import { UUID } from "crypto";
+import type { UUID } from "crypto";
 
 export class TeamResponse {
-    uuid!: UUID;
-    name!: string;
-    description!: string | null;
-};
+  uuid!: UUID;
+  name!: string;
+  description!: string | null;
+}

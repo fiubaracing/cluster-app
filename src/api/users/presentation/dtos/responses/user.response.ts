@@ -1,7 +1,7 @@
-import { UUID } from "crypto";
+import type { UUID } from "crypto";
 
 export class UserResponse {
-	uuid!: UUID;
-	email!: string;
-	name!: string;
+  uuid!: UUID;
+  email!: string;
+  name!: string;
 }

@@ -1,6 +1,6 @@
-import { Token } from "@/api/auth/domain/models/token";
+import type { Token } from "@/api/auth/domain/models/token";
 
 export class AuthResponse {
-	access!: Token;
-	refresh!: Token;
+  access!: Token;
+  refresh!: Token;
 }

@@ -1,9 +1,9 @@
 export class Token {
-	tokenId!: string;
-	token!: string;
+  tokenId!: string;
+  token!: string;
 
-    constructor(token: string) {
-        this.tokenId = crypto.randomUUID();
-        this.token = token;
-    }
+  constructor(token: string) {
+    this.tokenId = crypto.randomUUID();
+    this.token = token;
+  }
 }
