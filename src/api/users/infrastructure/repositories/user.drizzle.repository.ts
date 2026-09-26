@@ -2,12 +2,12 @@ import type { UUID } from "crypto";
 import {
   aliasedTable,
   and,
-  count,
-  desc,
   eq,
+  exists,
   ilike,
   inArray,
   or,
+  type SQL,
 } from "drizzle-orm";
 import type { Module } from "@/api/roles/domain/models/module.model";
 import type { Permission } from "@/api/roles/domain/models/permission.model";
@@ -420,43 +420,39 @@ export class UserDrizzleRepository extends DrizzleRepository {
   static async findAllUsers(
     dto: FindAllUsersDTO,
   ): Promise<Paginated<UserEntity>> {
-    const dataScopeClause = dto.dataScope.isGlobal
-      ? undefined
-      : or(
-          dto.dataScope.ownerUuid
-            ? eq(creator.uuid, dto.dataScope.ownerUuid)
-            : undefined,
-          dto.dataScope.teamUuids
-            ? inArray(teamsInCore.uuid, dto.dataScope.teamUuids)
-            : undefined,
-        );
+    const where = and(
+      UserDrizzleRepository.toDataScopeClause(dto.dataScope, {
+        createdBy: usersInCore.createdBy,
+        inTeams: (teamUuids) =>
+          exists(
+            db
+              .select({ id: userTeamsInCore.userId })
+              .from(userTeamsInCore)
+              .innerJoin(
+                teamsInCore,
+                eq(userTeamsInCore.teamId, teamsInCore.id),
+              )
+              .where(
+                and(
+                  eq(userTeamsInCore.userId, usersInCore.id),
+                  inArray(teamsInCore.uuid, teamUuids),
+                ),
+              ),
+          ),
+      }),
+      UserDrizzleRepository.toSearchClause(dto.search),
+    );
 
-    const whereClause = dto.search
-      ? or(
-          ilike(usersInCore.email, `%${dto.search}%`),
-          ilike(usersInCore.name, `%${dto.search}%`),
-        )
-      : undefined;
-
-    const rows = await db
-      .select(usersInCore._.columns)
-      .from(usersInCore)
-      .leftJoin(creator, eq(usersInCore.createdBy, creator.id))
-      .leftJoin(userTeamsInCore, eq(usersInCore.id, userTeamsInCore.userId))
-      .leftJoin(teamsInCore, eq(userTeamsInCore.teamId, teamsInCore.id))
-      .where(and(dataScopeClause, whereClause))
-      .orderBy(...UserDrizzleRepository.toOrderByClause(dto, usersInCore))
-      .limit(dto.limit)
-      .offset(dto.page * dto.limit);
-
-    const total = await db
-      .select({ count: count(usersInCore.id) })
-      .from(usersInCore)
-      .leftJoin(creator, eq(usersInCore.createdBy, creator.id))
-      .leftJoin(userTeamsInCore, eq(usersInCore.id, userTeamsInCore.userId))
-      .leftJoin(teamsInCore, eq(userTeamsInCore.teamId, teamsInCore.id))
-      .where(and(dataScopeClause, whereClause))
-      .then((result) => (result[0] as { count?: number })?.count ?? 0);
+    const [rows, total] = await Promise.all([
+      db
+        .select()
+        .from(usersInCore)
+        .where(where)
+        .orderBy(...UserDrizzleRepository.toOrderByClause(dto, usersInCore))
+        .limit(dto.limit)
+        .offset(dto.page * dto.limit),
+      db.$count(usersInCore, where),
+    ]);
 
     return {
       data: rows as UserEntity[],
@@ -464,5 +460,14 @@ export class UserDrizzleRepository extends DrizzleRepository {
       limit: dto.limit,
       total,
     } as Paginated<UserEntity>;
+  }
+
+  private static toSearchClause(search?: string): SQL | undefined {
+    if (!search) return undefined;
+    const pattern = `%${UserDrizzleRepository.escapeLikePattern(search)}%`;
+    return or(
+      ilike(usersInCore.email, pattern),
+      ilike(usersInCore.name, pattern),
+    );
   }
 }
