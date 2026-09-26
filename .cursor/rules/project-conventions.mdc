@@ -1,0 +1,11 @@
+---
+description: Project architecture and coding conventions
+alwaysApply: true
+---
+
+Before writing or changing any code, read and follow:
+
+- @AGENTS.md: agent rules, including the Next.js 16 caveats (check `node_modules/next/dist/docs/` before using any Next.js API).
+- @CONTRIBUTING.md: the project's architecture and conventions. That covers the backend onion layers and their one-way data flow (`request → DTO → entity → model → response`, never `model → entity → model`), the frontend feature structure, SQL migrations, and style and git rules.
+
+If a change would conflict with these documents, say so instead of silently diverging.
